@@ -1,0 +1,2087 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"call",
+				"callback_query"
+			],
+			[
+				"active",
+				"active_coach"
+			],
+			[
+				"job",
+				"job_queue〔argument〕"
+			],
+			[
+				"sched",
+				"scheduled_dt"
+			],
+			[
+				"scheduled",
+				"scheduled_at"
+			],
+			[
+				"Gra",
+				"Gratitude.AWAITING_REASONS"
+			],
+			[
+				"grat",
+				"gratitude_states〔argument〕"
+			],
+			[
+				"AWA",
+				"AWAITING_REASONS〔variable〕"
+			],
+			[
+				"gra",
+				"gratitude_states〔argument〕"
+			],
+			[
+				"gratu",
+				"gratitudes〔argument〕"
+			],
+			[
+				"test",
+				"test_db〔argument〕"
+			],
+			[
+				"tes",
+				"test_database〔module〕"
+			],
+			[
+				"create",
+				"create_users〔function〕"
+			],
+			[
+				"AWAI",
+				"AWAITING_GRATITUDE"
+			],
+			[
+				"coll",
+				"collector"
+			],
+			[
+				"coach",
+				"coach_name〔variable〕"
+			],
+			[
+				"tele",
+				"telegram_id"
+			],
+			[
+				"jb",
+				"job_queue"
+			],
+			[
+				"schedul",
+				"scheduled_remaining"
+			],
+			[
+				"handl",
+				"handle_coach_selection〔function〕"
+			],
+			[
+				"AW",
+				"AWAITING_COACH_SELECTION〔variable〕"
+			],
+			[
+				"AWAITING",
+				"AWAITING_SELECTION_CONFIRMATION"
+			],
+			[
+				"Coach",
+				"CoachSetup"
+			],
+			[
+				"update",
+				"update_handler〔function〕"
+			],
+			[
+				"send",
+				"sendMessage"
+			],
+			[
+				"keyb",
+				"keyboard_options〔variable〕"
+			],
+			[
+				"inline",
+				"inline_keyboad"
+			],
+			[
+				"diar",
+				"diary_entry〔variable〕"
+			],
+			[
+				"custom",
+				"custom_update〔module〕"
+			],
+			[
+				"tg",
+				"tg_get_or_create"
+			],
+			[
+				"from",
+				"from_user"
+			],
+			[
+				"add",
+				"add_handler"
+			],
+			[
+				"config",
+				"config_update"
+			],
+			[
+				"In",
+				"InlineKeyboardMarkup"
+			],
+			[
+				"A",
+				"AWAITING_SELECTION_CONFIRMATION〔variable〕"
+			],
+			[
+				"messa",
+				"message_fix"
+			],
+			[
+				"wake",
+				"wake_time"
+			],
+			[
+				"__name",
+				"__name__ == '__main__':〔variable〕"
+			],
+			[
+				"authori",
+				"author_id"
+			],
+			[
+				"author",
+				"author_id"
+			],
+			[
+				"auth",
+				"authorize"
+			],
+			[
+				"filter",
+				"filter_by"
+			],
+			[
+				"Lin",
+				"LinkedPicturePercept〔module〕"
+			],
+			[
+				"perce",
+				"percept_assocs〔argument〕"
+			],
+			[
+				"get",
+				"get_percept"
+			],
+			[
+				"per",
+				"percept_assocs〔argument〕"
+			],
+			[
+				"tho",
+				"thought_with_attachments"
+			],
+			[
+				"curren",
+				"current_user〔module〕"
+			],
+			[
+				"percept",
+				"percept_assocs"
+			],
+			[
+				"th",
+				"thought_with_attachments〔argument〕"
+			],
+			[
+				"thought",
+				"thought_with_attachments〔argument〕"
+			],
+			[
+				"thought_",
+				"thought_with_attachments"
+			],
+			[
+				"upda",
+				"update_comment_count"
+			],
+			[
+				"thougt",
+				"thought_data"
+			],
+			[
+				"current",
+				"current_upvotes〔variable〕"
+			],
+			[
+				"Link",
+				"LinkPercept"
+			],
+			[
+				"find",
+				"find_mentions〔function〕"
+			],
+			[
+				"epoc",
+				"epoch_seconds"
+			],
+			[
+				"epoch",
+				"epoch_seconds〔variable〕"
+			],
+			[
+				"moveme",
+				"movement_with_thoughts〔argument〕"
+			],
+			[
+				"movem",
+				"movement_with_thoughts〔argument〕"
+			],
+			[
+				"move",
+				"movement_with_thoughts〔argument〕"
+			],
+			[
+				"movement",
+				"movement_with_thoughts"
+			],
+			[
+				"invitation",
+				"invitation_code"
+			],
+			[
+				"vali",
+				"valid_invitation"
+			],
+			[
+				"valid",
+				"valid_invitation〔variable〕"
+			],
+			[
+				"acti",
+				"active_member"
+			],
+			[
+				"toggl",
+				"toggle_movement_membership"
+			],
+			[
+				"toggle",
+				"toggle_movement_membership〔function〕"
+			],
+			[
+				"is",
+				"is_authenticated"
+			],
+			[
+				"is_a",
+				"is_authenticated"
+			],
+			[
+				"Not",
+				"Notification〔module〕"
+			],
+			[
+				"Perce",
+				"PerceptAssociation〔module〕"
+			],
+			[
+				"TOP",
+				"TOP_THOUGHT_CACHE_DURATION〔variable〕"
+			],
+			[
+				"Re",
+				"ReplyNotification〔module〕"
+			],
+			[
+				"Ment",
+				"MentionNotification〔class〕"
+			],
+			[
+				"Uni",
+				"UniqueConstraint"
+			],
+			[
+				"ATTENT",
+				"ATTENTION_MULT"
+			],
+			[
+				"refres",
+				"refresh_upvote_count"
+			],
+			[
+				"refre",
+				"refresh_recent_thoughts〔function〕"
+			],
+			[
+				"Base",
+				"BaseModel〔class〕"
+			],
+			[
+				"pa",
+				"pathsep〔variable〕"
+			],
+			[
+				"func",
+				"func_wrapper〔function〕"
+			],
+			[
+				"frontpage",
+				"frontpage_sources"
+			],
+			[
+				"percep",
+				"percept_assocs"
+			],
+			[
+				"mindspace",
+				"mindspace_top_thought"
+			],
+			[
+				"mindsa",
+				"mindspace_top_thought"
+			],
+			[
+				"refresh_",
+				"refresh_upvote_count〔function〕"
+			],
+			[
+				"amplite",
+				"amplitudeProps"
+			],
+			[
+				"act",
+				"active_persona"
+			],
+			[
+				"sour",
+				"source_idents"
+			],
+			[
+				"top",
+				"top_post_selection"
+			],
+			[
+				"help",
+				"help_page"
+			],
+			[
+				"conver",
+				"conversation_list"
+			],
+			[
+				"conv",
+				"conv_dict"
+			],
+			[
+				"anim",
+				"anim_duration〔variable〕"
+			],
+			[
+				"top_global",
+				"top_global|length"
+			],
+			[
+				"recent",
+				"recent_thoughts〔module〕"
+			],
+			[
+				"cache",
+				"cache_key"
+			],
+			[
+				"cahce",
+				"cache_key"
+			],
+			[
+				"SQL",
+				"SQLAlchemyError"
+			],
+			[
+				"node",
+				"node_indexes〔variable〕"
+			],
+			[
+				"email",
+				"email_pref"
+			],
+			[
+				"not",
+				"notifcation"
+			],
+			[
+				"Noti",
+				"Notification"
+			],
+			[
+				"Th",
+				"Thought〔module〕"
+			],
+			[
+				"time",
+				"time_start"
+			],
+			[
+				"nucleu",
+				"nucleus_logger〔variable〕"
+			],
+			[
+				"overflo",
+				"overflow-y"
+			],
+			[
+				"can",
+				"candidate"
+			],
+			[
+				"persona",
+				"persona_blog"
+			],
+			[
+				"catch",
+				"catchall_enabled"
+			],
+			[
+				"Email",
+				"EmailPrefsForm〔module〕"
+			],
+			[
+				"Bool",
+				"Boolean"
+			],
+			[
+				"delet",
+				"delete_id"
+			],
+			[
+				"delete",
+				"delete_memoized"
+			],
+			[
+				"commtn",
+				"comment_count"
+			],
+			[
+				"htt",
+				"http_auth〔class〕"
+			],
+			[
+				"HTTP",
+				"HTTPDigestAuth〔module〕"
+			],
+			[
+				"pers",
+				"persona_blog"
+			],
+			[
+				"mindsp",
+				"mindspace_top_thought"
+			],
+			[
+				"blog",
+				"blog_data"
+			],
+			[
+				"primar",
+				"primaryjoin"
+			],
+			[
+				"ATT",
+				"ATTENTION_MULT〔variable〕"
+			],
+			[
+				"Value",
+				"ValueError〔class〕"
+			],
+			[
+				"re",
+				"required_votes〔function〕"
+			],
+			[
+				"upvote",
+				"upvote_count"
+			],
+			[
+				"member",
+				"member_count"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "frontend/src/App.js",
+			"settings":
+			{
+				"buffer_size": 1017,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 127.0,
+		"last_filter": "wrap",
+		"selected_items":
+		[
+			[
+				"wrap",
+				"Word Wrap: Toggle"
+			],
+			[
+				"build",
+				"Build With: Python"
+			],
+			[
+				"bu",
+				"Build With: Python"
+			],
+			[
+				"",
+				"File: Copy Path"
+			],
+			[
+				"rename",
+				"File: Rename"
+			],
+			[
+				"html",
+				"Set Syntax: HTML"
+			],
+			[
+				"java",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"jija",
+				"Set Syntax: Jinja2"
+			],
+			[
+				"prettif",
+				"HTMLPrettify"
+			],
+			[
+				"jinja",
+				"Set Syntax: HTML (Jinja2)"
+			],
+			[
+				"js",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"side",
+				"View: Toggle Side Bar"
+			],
+			[
+				"markdo",
+				"Set Syntax: Markdown"
+			],
+			[
+				"package",
+				"Package Control: Remove Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"mini",
+				"View: Toggle Minimap"
+			],
+			[
+				"git diff ",
+				"Git: Diff Current File"
+			],
+			[
+				"shell",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"git reset",
+				"Git: Reset (unstage) Current File"
+			],
+			[
+				"close all",
+				"File: Close All"
+			],
+			[
+				"diff cu",
+				"Git: Diff Current File"
+			],
+			[
+				"git comm",
+				"Git: Commit"
+			],
+			[
+				"git add",
+				"Git: Add Current File"
+			],
+			[
+				"git diff",
+				"Git: Diff All Files"
+			],
+			[
+				"git push",
+				"Git: Push"
+			],
+			[
+				"git amm",
+				"Git: Amend Commit"
+			],
+			[
+				"promote",
+				"File: Copy Path From Project Encoded"
+			],
+			[
+				"git pl",
+				"Git: Pull"
+			],
+			[
+				"git pull",
+				"Git: Pull"
+			],
+			[
+				"git rese",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"git pull cu",
+				"Git: Pull Current Branch"
+			],
+			[
+				"git pul",
+				"Git: Pull Current Branch"
+			],
+			[
+				"git res",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"reset cu",
+				"Git: Reset (unstage) Current File"
+			],
+			[
+				"git reset ",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"dif",
+				"Git: Diff Current File"
+			],
+			[
+				"diff ",
+				"FileDiffs: Menu"
+			],
+			[
+				"diff",
+				"Git: Diff Current File"
+			],
+			[
+				"rempv",
+				"Package Control: Remove Package"
+			],
+			[
+				"git reset hea",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"open",
+				"File: Open In Browser - Production Server"
+			],
+			[
+				"reset",
+				"Git: Reset (hard) HEAD"
+			],
+			[
+				"diff current",
+				"Git: Diff Current File"
+			],
+			[
+				"current ",
+				"Git: Diff Current File"
+			],
+			[
+				"diff curr",
+				"Git: Diff Current File"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"modi",
+				"Modific: Revert modified part"
+			],
+			[
+				"modif",
+				"Modific: Show diff"
+			],
+			[
+				"def",
+				"Preferences: Settings - Default"
+			],
+			[
+				"conver",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"spaces",
+				"Indentation: Convert to Spaces"
+			],
+			[
+				"synt dif",
+				"Set Syntax: Diff"
+			],
+			[
+				"mark",
+				"Set Syntax: Markdown"
+			],
+			[
+				"py lint",
+				"User: Python Flake8 Lint"
+			],
+			[
+				"synta diff",
+				"Set Syntax: Diff"
+			],
+			[
+				"sideba",
+				"View: Toggle Side Bar"
+			],
+			[
+				"how",
+				"How do I"
+			],
+			[
+				"sublimerge",
+				"Sublimerge: Show Changes Introduced in Revision..."
+			],
+			[
+				"pyt",
+				"Set Syntax: Python"
+			],
+			[
+				"git commit",
+				"Set Syntax: Git Commit Message"
+			],
+			[
+				"isnt",
+				"Package Control: Install Package"
+			],
+			[
+				"linter",
+				"SublimeLinter: Choose Gutter Theme"
+			],
+			[
+				"lint",
+				"SublimeLinter: Choose Mark Style"
+			],
+			[
+				"gutt",
+				"SublimeLinter: Choose Gutter Theme"
+			],
+			[
+				"gut",
+				"SublimeLinter: Choose Gutter Theme"
+			],
+			[
+				"flak",
+				"User: Python Flake8 Lint"
+			],
+			[
+				"pylin",
+				"User: Python Flake8 Lint"
+			],
+			[
+				"view",
+				"View: Toggle Side Bar"
+			],
+			[
+				"less",
+				"Set Syntax: LESS"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"git",
+				"GitStatus: Changed files"
+			],
+			[
+				"py",
+				"Set Syntax: Python"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"modific",
+				"Modific: Show diff"
+			],
+			[
+				"pref",
+				"Preferences: Settings - User"
+			],
+			[
+				"syntax c",
+				"Set Syntax: C"
+			],
+			[
+				"json",
+				"Set Syntax: JSON"
+			],
+			[
+				"sql",
+				"Set Syntax: SQL"
+			],
+			[
+				"javasc",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"markd",
+				"Set Syntax: Markdown"
+			],
+			[
+				"python",
+				"Set Syntax: Python"
+			],
+			[
+				"mat",
+				"Set Syntax: MATLAB"
+			],
+			[
+				"pyth",
+				"Set Syntax: Python"
+			],
+			[
+				"pack",
+				"Package Control: List Packages"
+			],
+			[
+				"snipp",
+				"Snippet: #!/usr/bin/env"
+			],
+			[
+				"dis",
+				"SublimeLinter: Disable Linting"
+			],
+			[
+				"disab",
+				"SublimeLinter: Disable Linting"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"lint di",
+				"SublimeLinter: Disable Linting"
+			],
+			[
+				"lint dis",
+				"SublimeCodeIntel: Disable Plugin"
+			],
+			[
+				"liunt",
+				"SublimeLinter: Lint Current File"
+			],
+			[
+				"disa",
+				"SublimeLinter: Disable Linting"
+			],
+			[
+				"try",
+				"Snippet: Try/Except"
+			],
+			[
+				"except",
+				"Snippet: Try/Except"
+			],
+			[
+				"codeintel",
+				"SublimeCodeIntel: Enable Plugin"
+			],
+			[
+				"plugin",
+				"SublimeCodeIntel: Disable Plugin"
+			],
+			[
+				"status",
+				"Git: Status"
+			],
+			[
+				"stack",
+				"Stackoverflow: Search Selection"
+			],
+			[
+				"stat",
+				"Git: Status"
+			],
+			[
+				"git status",
+				"Git: Status"
+			],
+			[
+				"git stat",
+				"Git: Status"
+			],
+			[
+				"sta",
+				"Git: Status"
+			],
+			[
+				"git sta",
+				"Git: Status"
+			],
+			[
+				"background",
+				"SublimeLinter: Enable Background Linting"
+			]
+		],
+		"width": 485.0
+	},
+	"console":
+	{
+		"height": 124.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": true,
+		"side_bar_visible": false,
+		"status_bar_visible": true
+	},
+	"expanded_folders":
+	[
+		"/Users/vaul/Projects/displaybot"
+	],
+	"file_history":
+	[
+		"/Users/vaul/Projects/displaybot/frontend/src/components/Layout/Layout.js",
+		"/Users/vaul/.jupyter/custom/custom.css",
+		"/Users/vaul/Projects/displaybot/DisplayBot.py",
+		"/Users/vaul/Projects/vahrend11/static/index.html",
+		"/Users/vaul/Downloads/mail.html",
+		"/Users/vaul/Projects/vahrend11/index.yaml",
+		"/Users/vaul/Projects/saybot/venv/gtsample.py",
+		"/Users/vaul/backups/vamail_backup.log",
+		"/Users/vaul/Projects/fip_playlist/fip3.py",
+		"/Users/vaul/Downloads/hypernormalisation.(2016).eng.1cd.(6769470)/BBC.HyperNormalisation.720p.h264.AAC.MVGroup.srt",
+		"/Users/vaul/backups/backup_nichte.sh",
+		"/Users/vaul/backups/backup_vahrend.sh",
+		"/Users/vaul/Projects/saybot/venv/trans.py",
+		"/Users/vaul/backups/backup_gmail.sh",
+		"/Users/vaul/Projects/fip_playlist/fip.py",
+		"/Applications/Civ6.app/Contents/Assets/Base/Assets/UI/ToolTips/PlotToolTip.lua",
+		"/Users/vaul/Projects/ultimate-flask-front-end-2.1/project/app.py",
+		"/Users/vaul/Projects/ultimate-flask-front-end-2.1/project/templates/hello.html",
+		"/Users/vaul/Downloads/Always mobile Wikipedia (1).user.js",
+		"/Users/vaul/Projects/Instant-Movie-Streamer/bin/ims",
+		"/Users/vaul/Projects/pete/peter.log",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/coaches.py",
+		"/Users/vaul/Projects/pete/diary-peter/main.py",
+		"/usr/local/bin/ims",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/jobs.py",
+		"/Users/vaul/Projects/pete/diary-peter/setup.script.mdown",
+		"/Users/vaul/Projects/pete/diary-peter/setup.py",
+		"/Users/vaul/Projects/pete/diary-peter/requirements.txt",
+		"/Users/vaul/Projects/pete/diary-peter/empty_database.py",
+		"/Users/vaul/Projects/pete/diary-peter/create_database.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/test_models.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/test_coaches.py",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/__init__.py",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/keyboards.py",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/models.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/conftest.py",
+		"/Users/vaul/Projects/pete/diary-peter/LICENSE",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/utils.py",
+		"/Users/vaul/Projects/pete/diary-peter/jobs.py",
+		"/Users/vaul/Projects/pete/diary-peter/utils.py",
+		"/Users/vaul/Projects/pete/Models.md",
+		"/Users/vaul/Projects/pete/diary-peter/inlinebot.py",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/handlers.py",
+		"/Users/vaul/Library/Application Support/Sublime Text 3/Packages/User/pdb_snippet",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/dispatchers.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/test_dispatchers.py",
+		"/Users/vaul/Projects/soumaenv/souma/setup.py",
+		"/Users/vaul/Projects/pete/lib/python3.5/site-packages/telegram/ext/updater.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/util.py",
+		"/Users/vaul/Projects/pete/diary-peter/diary_peter/tests/test_models.py",
+		"/Users/vaul/Projects/pete/diary-peter/tests/test_base.py",
+		"/Users/vaul/Projects/pete/diary-peter/setup.sh",
+		"/Users/vaul/Projects/pete/diary-pete/diary-pete/models.py",
+		"/Users/vaul/Projects/cognitive_networks/app/.gitignore",
+		"/Volumes/Logbook/Logbook/process.sh",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/views.py",
+		"/Users/vaul/Projects/simpleWeather/simpleWeather.py",
+		"/Users/vaul/Projects/cognitive_networks/app/app.yaml",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/jobs.py",
+		"/Users/vaul/Downloads/zann.epub",
+		"/Users/vaul/Downloads/zann.mobi",
+		"/Users/vaul/Desktop/bla.txt",
+		"/Users/vaul/Desktop/8ee6289bb45ff4fee154a382d574514b.jpg",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/conftest.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/tests/test_content.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/tests/test_context.py",
+		"/Users/vaul/Projects/soumaenv/glia/.gitignore",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/__init__.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/helpers.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/content.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/identity.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/context.py",
+		"/Users/vaul/Projects/soumaenv/glia/.coverage",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/helpers.py",
+		"/Users/vaul/Projects/soumaenv/glia/worker.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/tests/test_connections.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/tests/test_helpers.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/tests/test_identity.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/forms.py",
+		"/Users/vaul/Projects/soumaenv/glia/default_config.py",
+		"/Users/vaul/Dropbox/Studium/ba/rktik-thesis/03_implementation.md",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/base.py",
+		"/Users/vaul/Projects/glia-test-reqs/gliaenv/lib/python2.7/site-packages/sqlalchemy/engine/base.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/connections.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/__init__.py",
+		"/Users/vaul/Projects/soumaenv/glia/development_config.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/tests/test_connections.py",
+		"/Users/vaul/Projects/soumaenv/glia/requirements.txt",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/persona_blog.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/movement_blog.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/macros/helpers.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/macros/chat.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/movement_list.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/movement_mindspace.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/notebook.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/notifications.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/persona.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/base.html",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/debug.html",
+		"/Users/vaul/Projects/soumaenv/souma/web_ui/pagemanager.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/events.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/async.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/helpers.py",
+		"/Users/vaul/Projects/soumaenv/lib/python2.7/site-packages/flask/config.py",
+		"/usr/local/lib/python2.7/site-packages/flask_sqlalchemy/__init__.py",
+		"/Users/vaul/Projects/soumaenv/glia/run_server.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/identities.py",
+		"/Users/vaul/Projects/glia-test-reqs/gliaenv/lib/python2.7/site-packages/sqlalchemy/orm/identity.py",
+		"/Users/vaul/Projects/soumaenv/glia/migrations_extra/has_blogged.py",
+		"/Users/vaul/Projects/soumaenv/glia/migrations_extra/mindspace_upgrade.py",
+		"/Users/vaul/Projects/soumaenv/glia/migrations_extra/comment_count.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/web/__init__.py",
+		"/usr/local/lib/python2.7/site-packages/sqlalchemy/ext/declarative/api.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/models.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/__init__.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/models/base.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/templates/index.html",
+		"/Users/vaul/Downloads/synthetics.har.json",
+		"/Users/vaul/Projects/soumaenv/glia/manage.py",
+		"/Users/vaul/Projects/soumaenv/glia/production_config.py",
+		"/Users/vaul/Projects/soumaenv/glia/testing_config.py",
+		"/usr/local/lib/python2.7/site-packages/flask_rq.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/static/js/main.js",
+		"/Users/vaul/Projects/soumaenv/glia/glia/api/myelin.py",
+		"/Users/vaul/Projects/soumaenv/glia/migrations/versions/41f11e397f3c_remove_vesicle.py",
+		"/Users/vaul/Projects/soumaenv/glia/nucleus/nucleus/vesicle.py",
+		"/Users/vaul/Projects/soumaenv/nucleus/nucleus/models.py",
+		"/Users/vaul/Projects/soumaenv/glia/glia/api/views.py"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/Users/vaul/Projects/pete/diary-peter/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus/tests",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/glia/templates/",
+			"/Users/vaul/Projects/soumaenv/glia/templates/",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus/models.py",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/glia-test-reqs/gliaenv/lib/python2.7/site-packages/sqlalchemy",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/migrations",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/glia/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/glia/templates",
+			"/Users/vaul/Projects/soumaenv/glia/templates",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/glia/templates",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/souma",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/souma",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/nucleus/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/glia/api",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/glia/models.py",
+			"/Users/vaul/Projects/soumaenv/glia",
+			"/Users/vaul/Projects/soumaenv/nucleus",
+			"/Users/vaul/Projects/soumaenv/rktik",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/glia/",
+			"/Users/vaul/Projects/soumaenv/",
+			"/Users/vaul/Projects/soumaenv/souma/",
+			"/Users/vaul/Projects/soumaenv/rktik/",
+			"/Users/vahrend/Projects/soumaenv/rktik/",
+			"/Users/vahrend/Projects/soumaenv/souma/",
+			"/Users/vahrend/Projects/soumaenv/",
+			"/Users/vahrend/Projects/soumaenv/souma/",
+			"/Users/vahrend/Projects/soumaenv/souma/astrolab/",
+			"/Users/vahrend/Projects/soumaenv/souma/",
+			"/Users/vahrend/Projects/souma-2/lib/python2.7/site-packages/py2app",
+			"/Users/vahrend/Projects/souma-2/soma/",
+			"/Users/vahrend/Projects/khemia/soma/",
+			"/Users/vahrend/Projects/khemia/glia/",
+			"/Users/vahrend/Projects/khemia/soma/",
+			"/Users/vahrend/Projects/khemia/glia/",
+			"/Users/vahrend/Projects/khemia/soma/",
+			"/Users/vahrend/Projects/khemia/glia/",
+			"/Users/vahrend/Projects/khemia/soma/",
+			"/Users/vahrend/Projects/khemia/glia/",
+			"/Users/vahrend/Projects/khemia/soma/",
+			"/Users/vahrend/Projects/khemia/",
+			"/Users/vahrend/Projects/khemia/glia",
+			"/Users/vahrend/Projects/khemia/soma",
+			"DBVesicle",
+			"/Users/vahrend/Projects/khemia/",
+			"/Users/vahrend/Projects/khemia/soma",
+			"this",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"jsonfile",
+			" -t full ",
+			" -t quick",
+			"__fiptime",
+			"res",
+			"sur <span",
+			"lightroom",
+			"waveshare32b",
+			"hours=6",
+			"text",
+			"inline_",
+			"timede",
+			"You can alwa",
+			"AVAILABLE_COACH",
+			"import logger",
+			"create_users(",
+			"logging",
+			"AVAILABLE_COACHES",
+			"logging",
+			"scheduled",
+			"job",
+			"config",
+			"g.user",
+			"reason",
+			"self",
+			"rv",
+			"config",
+			"Markdown",
+			"AVAILABLE_COACH",
+			"self",
+			" - 1",
+			"t",
+			"len(self.collector)",
+			"Setup(",
+			"Menu(",
+			"cls",
+			"user",
+			"datetime",
+			"new_",
+			"CoachSetup",
+			"sendMessage(update.message.chat_id",
+			"hide",
+			"False",
+			"callback_query",
+			"data",
+			".message",
+			"message",
+			"coach_update",
+			"setup_update",
+			"Goal",
+			"keyboard_options",
+			"text",
+			"chat_id",
+			"update.message.from_user",
+			"Setup.",
+			"MAIN",
+			"menu.main",
+			"new_user(",
+			"state_coach",
+			"state_module",
+			"addHandler",
+			"markdown",
+			"config_update",
+			"Config",
+			"nickname",
+			"first_name",
+			"Menu",
+			"Config",
+			"[\"",
+			"],",
+			"*:",
+			"**",
+			"uuid4",
+			"db",
+			"create_table",
+			"user",
+			"tguser",
+			"update",
+			"test_database",
+			"config_updates",
+			"keyboard",
+			"messages",
+			", create_tables=True",
+			"user",
+			"print",
+			"debug",
+			"info",
+			"telegram.",
+			"updater.dispatcher",
+			"class",
+			"CharField",
+			"get_chat",
+			"cls.query.",
+			"movements[0]",
+			"personas[0]",
+			"\"update\"",
+			"blog",
+			"\"read\"",
+			"read",
+			"\"read\"",
+			"members =",
+			"movements[0]",
+			"personas[0]",
+			"movement",
+			"raises(",
+			"Test title",
+			"look",
+			"look it is",
+			"OWLS",
+			"owls",
+			"default=",
+			"super(",
+			"*args, **kwargs",
+			", default=datetime.datetime.utcnow()",
+			"ALLOWED_ACTIONS",
+			"ms",
+			"=",
+			", ",
+			"notif",
+			"notifications",
+			"notifi",
+			"pt",
+			"tp",
+			"thought_with_attachments.percept_assocs",
+			"TagPercept(",
+			".hot ",
+			"top ",
+			"nocache"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"ACCESS_MODES",
+			"active_persona",
+			"Text",
+			"ForeignKey",
+			"backref",
+			"relationship",
+			"Table",
+			"DateTime",
+			"Boolean",
+			"Integer",
+			"String",
+			"Column",
+			"startswith",
+			"UPVOTE",
+			"upvote",
+			"Upvote",
+			"upvoted",
+			"souma",
+			"Souma",
+			"SOUMA",
+			"Souma",
+			"souma",
+			"rktik",
+			"Rktik",
+			"RKTIK",
+			"PERCEPT",
+			"percept",
+			"Percept",
+			"thought",
+			"Thought",
+			"thought",
+			"THOUGHT",
+			"thought.",
+			"Thought.",
+			"MINDSET",
+			"mindset",
+			"Mindset",
+			"THOUGHT",
+			"thought",
+			"Thought",
+			"thought",
+			"Thought",
+			"UPVOTE",
+			"upvote",
+			"Upvote",
+			"CLIENT_NOT_FOUND",
+			"RKTIK",
+			"rktik",
+			"Rktik",
+			"percept",
+			"Percept",
+			"PERCEPT",
+			"THOUGHT",
+			"thought",
+			"Thought",
+			"Mindset",
+			"mindset",
+			"Mindset",
+			"_insert_required",
+			"_update_required",
+			"   - ",
+			"ark",
+			"",
+			"Ark",
+			"Arche"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "frontend/src/App.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1017,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								494,
+								494
+							]
+						],
+						"settings":
+						{
+							"auto_complete": false,
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 30.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 267.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git":
+	{
+		"height": 92.0
+	},
+	"output.sftp":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "displaybot.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"main",
+				"diary-peter/main.py"
+			],
+			[
+				"job",
+				"diary-peter/diary_peter/jobs.py"
+			],
+			[
+				"coaches",
+				"diary-peter/diary_peter/coaches.py"
+			],
+			[
+				"empt",
+				"diary-peter/empty_database.py"
+			],
+			[
+				"crea",
+				"diary-peter/create_database.py"
+			],
+			[
+				"utils",
+				"diary-peter/diary_peter/utils.py"
+			],
+			[
+				"testmode",
+				"diary-peter/tests/test_models.py"
+			],
+			[
+				"coach",
+				"diary-peter/diary_peter/coaches.py"
+			],
+			[
+				"model",
+				"diary-peter/diary_peter/models.py"
+			],
+			[
+				"mode",
+				"diary-peter/diary_peter/models.py"
+			],
+			[
+				"jobs",
+				"glia/nucleus/nucleus/jobs.py"
+			],
+			[
+				"views",
+				"glia/glia/web/views.py"
+			],
+			[
+				"gitign",
+				"glia/.gitignore"
+			],
+			[
+				"cover",
+				"glia/.coverage"
+			],
+			[
+				"iden",
+				"glia/nucleus/nucleus/identity.py"
+			],
+			[
+				"helper",
+				"glia/nucleus/nucleus/helpers.py"
+			],
+			[
+				"webhelp",
+				"glia/glia/web/helpers.py"
+			],
+			[
+				"testcontent",
+				"glia/nucleus/tests/test_content.py"
+			],
+			[
+				"content",
+				"glia/nucleus/nucleus/content.py"
+			],
+			[
+				"ident",
+				"glia/nucleus/nucleus/identity.py"
+			],
+			[
+				"nucini",
+				"glia/nucleus/nucleus/__init__.py"
+			],
+			[
+				"conf",
+				"glia/nucleus/conftest.py"
+			],
+			[
+				"testcont",
+				"glia/nucleus/tests/test_context.py"
+			],
+			[
+				"context",
+				"glia/nucleus/nucleus/context.py"
+			],
+			[
+				"testcontex",
+				"glia/nucleus/tests/test_context.py"
+			],
+			[
+				"testconn",
+				"glia/nucleus/tests/test_connections.py"
+			],
+			[
+				"workr",
+				"glia/worker.py"
+			],
+			[
+				"help",
+				"glia/nucleus/nucleus/helpers.py"
+			],
+			[
+				"view",
+				"glia/glia/web/views.py"
+			],
+			[
+				"testiden",
+				"glia/nucleus/tests/test_identity.py"
+			],
+			[
+				"contex",
+				"glia/nucleus/nucleus/context.py"
+			],
+			[
+				"testident",
+				"glia/nucleus/tests/test_identity.py"
+			],
+			[
+				"conftes",
+				"glia/nucleus/conftest.py"
+			],
+			[
+				"defa",
+				"glia/default_config.py"
+			],
+			[
+				"webform",
+				"glia/glia/web/forms.py"
+			],
+			[
+				"form",
+				"glia/glia/web/forms.py"
+			],
+			[
+				"nuctest",
+				"glia/nucleus/tests/test_content.py"
+			],
+			[
+				"base",
+				"glia/nucleus/nucleus/base.py"
+			],
+			[
+				"connec",
+				"glia/nucleus/tests/test_connections.py"
+			],
+			[
+				"nucbas",
+				"glia/nucleus/nucleus/base.py"
+			],
+			[
+				"confte",
+				"glia/nucleus/conftest.py"
+			],
+			[
+				"identity",
+				"glia/nucleus/nucleus/identity.py"
+			],
+			[
+				"testconnec",
+				"glia/nucleus/tests/test_connections.py"
+			],
+			[
+				"gliaini",
+				"glia/glia/__init__.py"
+			],
+			[
+				"devel",
+				"glia/development_config.py"
+			],
+			[
+				"worker",
+				"glia/worker.py"
+			],
+			[
+				"req",
+				"glia/requirements.txt"
+			],
+			[
+				"personablog",
+				"glia/glia/templates/persona_blog.html"
+			],
+			[
+				"movbl",
+				"glia/glia/templates/movement_blog.html"
+			],
+			[
+				"webhel",
+				"glia/glia/web/helpers.py"
+			],
+			[
+				"conte",
+				"glia/nucleus/nucleus/content.py"
+			],
+			[
+				"contet",
+				"glia/nucleus/nucleus/content.py"
+			],
+			[
+				"nuche",
+				"glia/nucleus/nucleus/helpers.py"
+			],
+			[
+				"helpers",
+				"glia/glia/web/helpers.py"
+			],
+			[
+				"nuccon",
+				"glia/nucleus/nucleus/content.py"
+			],
+			[
+				"deve",
+				"glia/development_config.py"
+			],
+			[
+				"ini",
+				"glia/glia/__init__.py"
+			],
+			[
+				"maccha",
+				"glia/glia/templates/macros/chat.html"
+			],
+			[
+				"nucbsas",
+				"glia/nucleus/nucleus/base.py"
+			],
+			[
+				"nucbase",
+				"glia/nucleus/nucleus/base.py"
+			],
+			[
+				"gliahel",
+				"glia/glia/helpers.py"
+			],
+			[
+				"dev",
+				"glia/development_config.py"
+			],
+			[
+				"run_s",
+				"glia/run_server.py"
+			],
+			[
+				"con",
+				"glia/nucleus/nucleus/content.py"
+			],
+			[
+				"defaul",
+				"glia/default_config.py"
+			],
+			[
+				"nucmod",
+				"glia/nucleus/nucleus/models.py"
+			],
+			[
+				"basehtml",
+				"glia/glia/templates/base.html"
+			],
+			[
+				"index",
+				"glia/glia/templates/index.html"
+			],
+			[
+				"runs",
+				"glia/run_server.py"
+			],
+			[
+				"mana",
+				"glia/manage.py"
+			],
+			[
+				"events",
+				"glia/glia/web/events.py"
+			],
+			[
+				"def",
+				"glia/default_config.py"
+			],
+			[
+				"produc",
+				"glia/production_config.py"
+			],
+			[
+				"testingcon",
+				"glia/testing_config.py"
+			],
+			[
+				"main.js",
+				"glia/glia/static/js/main.js"
+			],
+			[
+				"work",
+				"glia/worker.py"
+			],
+			[
+				"event",
+				"glia/glia/web/events.py"
+			],
+			[
+				"mod",
+				"glia/nucleus/nucleus/models.py"
+			],
+			[
+				"produ",
+				"glia/production_config.py"
+			],
+			[
+				"testing",
+				"glia/testing_config.py"
+			],
+			[
+				"vesicle",
+				"glia/migrations/versions/41f11e397f3c_remove_vesicle.py"
+			],
+			[
+				"nuc",
+				"glia/nucleus/__init__.py"
+			],
+			[
+				"gliain",
+				"glia/glia/__init__.py"
+			],
+			[
+				"apiview",
+				"glia/glia/api/views.py"
+			],
+			[
+				"procf",
+				"glia/Procfile"
+			],
+			[
+				"testingconf",
+				"glia/testing_config.py"
+			],
+			[
+				"nuchel",
+				"glia/nucleus/nucleus/helpers.py"
+			],
+			[
+				"models",
+				"glia/nucleus/nucleus/models.py"
+			],
+			[
+				"asy",
+				"glia/glia/web/async.py"
+			],
+			[
+				"config",
+				"glia/development_config.py"
+			],
+			[
+				"runserv",
+				"glia/run_server.py"
+			],
+			[
+				"test",
+				"glia/run_tests.py"
+			],
+			[
+				"gliainit",
+				"glia/glia/__init__.py"
+			],
+			[
+				"nucda",
+				"glia/nucleus/nucleus/database.py"
+			],
+			[
+				"conn",
+				"glia/glia/static/config.json"
+			],
+			[
+				"nuchelp",
+				"glia/nucleus/nucleus/helpers.py"
+			],
+			[
+				"proc",
+				"glia/Procfile"
+			],
+			[
+				"async",
+				"glia/glia/web/async.py"
+			],
+			[
+				"database",
+				"glia/nucleus/nucleus/database.py"
+			],
+			[
+				"nucle",
+				"glia/nucleus/__init__.py"
+			],
+			[
+				"run",
+				"glia/run_server.py"
+			],
+			[
+				"util",
+				"glia/utility.py"
+			],
+			[
+				"base.html",
+				"glia/glia/templates/base.html"
+			],
+			[
+				"thought",
+				"glia/glia/templates/thought.html"
+			],
+			[
+				"develop",
+				"glia/development_config.py"
+			],
+			[
+				"init",
+				"glia/glia/__init__.py"
+			],
+			[
+				"webinit",
+				"glia/glia/web/__init__.py"
+			],
+			[
+				"side",
+				"sqlalchemy/orm/identity.py"
+			],
+			[
+				"prod",
+				"glia/production_config.py"
+			],
+			[
+				"pushtest",
+				"glia/push_testing.sh"
+			],
+			[
+				"reque",
+				"glia/requirements.txt"
+			],
+			[
+				"mindspa",
+				"glia/glia/templates/movement_mindspace.html"
+			],
+			[
+				"macth",
+				"glia/glia/templates/macros/thought.html"
+			],
+			[
+				"gliahelp",
+				"glia/glia/helpers.py"
+			],
+			[
+				"inde",
+				"glia/glia/templates/index.html"
+			],
+			[
+				"though",
+				"glia/glia/templates/thought.html"
+			],
+			[
+				"push",
+				"glia/push_production.sh"
+			],
+			[
+				"nucmo",
+				"nucleus/nucleus/models.py"
+			],
+			[
+				"temth",
+				"glia/templates/thought.html"
+			],
+			[
+				"mainjs",
+				"glia/static/js/main.js"
+			],
+			[
+				"pers",
+				"glia/templates/persona.html"
+			],
+			[
+				"person",
+				"glia/templates/persona.html"
+			],
+			[
+				"movemenlis",
+				"glia/templates/movement_list.html"
+			],
+			[
+				"note",
+				"glia/templates/notebook.html"
+			],
+			[
+				"main.les",
+				"glia/static/less/main.less"
+			],
+			[
+				"main.less",
+				"glia/static/less/main.less"
+			],
+			[
+				"movemmind",
+				"glia/templates/movement_mindspace.html"
+			],
+			[
+				"create",
+				"glia/templates/create_thought.html"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/Projects/soumaenv/souma.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 167.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
