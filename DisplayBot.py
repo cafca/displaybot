@@ -74,7 +74,7 @@ def receive(bot, update):
             if "Content-Type" in link.headers and link.headers["Content-Type"] in ["video/mp4", ]:
 
                 if add_url(url=url, author=update.message.from_user.first_name):
-                    update.message.reply_text("Adding video to database")
+                    update.message.reply_text("Added video to database")
                 else:
                     update.message.reply_text("Reposter!")
 
@@ -86,7 +86,7 @@ def receive(bot, update):
 
 # In[ ]:
 
-from peewee import *
+from peewee import IntegerField, CharField, DateTimeField, BaseModel, Model, OperationalError
 from playhouse.sqlite_ext import SqliteExtDatabase
 import datetime
 
@@ -100,6 +100,9 @@ class Video(BaseModel):
     url = CharField(unique=True)
     created = DateTimeField(default=datetime.datetime.now)
     author = CharField()
+
+    def __repr__(self):
+        return "Video by '{}' at '{}'".format(self.author, self.url)
 
     def serialize(self):
         rv = {
@@ -134,11 +137,8 @@ def add_url(url, author):
         return video
 
 def refresh_cache():
-    rv = {
-        "videos": [
-            v.serialize() for v in Video.select().order_by(Video.created.desc())
-        ]
-    }
+    videos = Video.select().order_by(Video.created.desc())
+    rv = {"videos": {v.id: v.serialize() for v in videos}}
     with open(CACHE_LOCATION, "w") as f:
         json.dump(rv, f)
     logger.info("Cache refreshed. Total {} videos".format(len(rv["videos"])))
@@ -178,5 +178,6 @@ def main():
 # In[ ]:
 
 if __name__ == '__main__':
+    refresh_cache()
     main()
 
