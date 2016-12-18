@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 
@@ -10,7 +9,8 @@ class App extends Component {
     this.state = {
       videos: [],
       currentVideo: null,
-      playlist: []
+      playlist: [],
+      infos: []
     };
 
     window.nextvideo = this.next.bind(this);
@@ -20,8 +20,9 @@ class App extends Component {
   componentDidMount() {
     this.timerID = setInterval(
       () => this.load(),
-      2500
+      1000
     );
+    this.addInfo("Ready");
   }
 
   componentWillUnmount() {
@@ -33,16 +34,27 @@ class App extends Component {
       let videoIds = Object.keys(this.state.videos);
       let newVideoIds = Object.keys(data.videos);
       let playlist = this.state.playlist;
-      for (var key in newVideoIds) {
-        if (!(key in videoIds)) {
-          console.log("Directly added video to playlist", this.state.videos[parseInt(key)+1])
-          playlist.push(parseInt(key)+1);
+      if (!cb) {
+        for (var key in newVideoIds) {
+          if (!(key in videoIds)) {
+            console.log("Directly added video to playlist", this.state.videos[parseInt(key)])
+            this.addInfo("!!! NEW CLIP INCOMING !!!");
+            playlist.push(parseInt(key)+1);
+          }
         }
       }
       this.setState(Object.assign({}, data, {playlist}));
-      console.log("Refreshed database")
-      if(cb) {cb.bind(this)()}
+      if(cb) {
+        this.addInfo("Got " + Object.keys(data.videos).length + " items")
+        cb.bind(this)()
+      }
     });
+  }
+
+  addInfo(info) {
+    let infos = Object.assign([], this.state.infos);
+    infos.push(info);
+    this.setState({infos});
   }
 
   loadJSON(callback) {
@@ -59,43 +71,30 @@ class App extends Component {
   }
 
   next() {
-    let newVideo, currentVideo, playlist;
+    let currentVideo, playlist;
 
-    if (Object.keys(this.state.videos).length == 0) {
+    if (Object.keys(this.state.videos).length === 0) {
       console.log("No videos available for play next.");
       this.setState({currentVideo: null});
 
     } else {
       playlist = this.state.playlist;
       if (playlist.length < 1) {
-        console.log("Playlist is empty");
+        this.addInfo("Shuffling..");
         playlist = this.createPlaylist()
       }
       currentVideo = playlist.pop();
-      console.log("Now playing", currentVideo, this.state.videos[currentVideo]);
+      let video = this.state.videos[currentVideo];
+      this.addInfo("Now playing item #" + currentVideo);
       this.setState({playlist, currentVideo});
     }
-
-    // } else if(!this.state.currentVideo) {
-    //   new_video = Object.keys(this.state.videos).length > 0 ? Object.keys(this.state.videos)[0] : null;
-    //   console.log("Starting playback with video", new_video, this.state.videos[new_video]);
-    //   this.setState({currentVideo: new_video});
-
-    // } else {
-    //   new_video = parseInt(this.state.currentVideo) + 1;
-    //   if(new_video > Object.keys(this.state.videos).length) {
-    //     new_video = 1;
-    //   }
-    //   console.log("Now playing", new_video, this.state.videos[new_video]);
-    //   this.setState({currentVideo: new_video});
-    // }
   }
 
   createPlaylist() {
     console.log("Playlist refill..");
     let videoIds = Object.keys(this.state.videos);
     let playlist = Array(5).fill(1).map(
-      () => videoIds[Math.floor(Math.random()*videoIds.length)]
+      () => videoIds[Math.floor(Math.pow(Math.random(), 0.8)*videoIds.length)]
     );
     return playlist
   }
@@ -111,19 +110,23 @@ class App extends Component {
   render() {
     let player;
     let video = this.state.videos[this.state.currentVideo];
-    let url = video ? video.url : "";
 
     if (this.state.currentVideo) {
       player = <VideoPlayer
-            source={video.url}
+            source={video ? video.url : ""}
             onEnded={() => {this.next()}}
+            next={() => {this.next()}}
+            onKeyDown={(e) => {this.next()}}
           />;
     } else {
-      player = "No video loaded.";
+      player = "Playlist empty.";
     }
 
     return (
       <div className="App">
+        <Info
+          infos={this.state.infos}
+        />
         <p>
           {player}
         </p>
@@ -138,11 +141,26 @@ class VideoPlayer extends React.Component {
     this.player = {play: () => {console.log("Cannot play before mount")}};
   }
 
+  componentDidMount() {
+    this.timerID = setInterval(
+      () => this.checkStillPlaying(),
+      1000
+    );
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.source !== this.props.source) {
       console.log("Updated component source, reload & play..");
       this.player.load();
       this.player.play();
+      clearInterval(this.timerID2);
+      this.timerID2 = setInterval(
+        () => {
+          console.log("Timeout next clip")
+          this.props.next()
+        },
+        10000
+      );
     }
   }
 
@@ -152,18 +170,24 @@ class VideoPlayer extends React.Component {
 
   fullscreen() {
     if (this.player) {
-    if (this.player.requestFullscreen) {
-      this.player.requestFullscreen();
-    } else if (this.player.msRequestFullscreen) {
-      this.player.msRequestFullscreen();
-    } else if (this.player.mozRequestFullScreen) {
-      this.player.mozRequestFullScreen();
-    } else if (this.player.webkitRequestFullscreen) {
-      this.player.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      if (this.player.requestFullscreen) {
+        this.player.requestFullscreen();
+      } else if (this.player.msRequestFullscreen) {
+        this.player.msRequestFullscreen();
+      } else if (this.player.mozRequestFullScreen) {
+        this.player.mozRequestFullScreen();
+      } else if (this.player.webkitRequestFullscreen) {
+        this.player.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      }
+    } else {
+      console.log("No player element for toggling fullscreen");
     }
-  } else {
-    console.log("No player element for toggling fullscreen");
   }
+
+  checkStillPlaying() {
+    if (this.player.paused) {
+      this.player.play();
+    }
   }
 
   render() {
@@ -176,6 +200,13 @@ class VideoPlayer extends React.Component {
           <source src={this.props.source}></source>
     </video>
   }
+};
+
+const Info = (props) => {
+  let lines = props.infos.slice(-5).map((l, i) => <p key={i}>{l}</p>);
+  return <div className="info">
+    {lines}
+  </div>
 };
 
 
