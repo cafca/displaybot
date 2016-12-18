@@ -26,16 +26,24 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
-
 TELEGRAM_API_TOKEN = "266345127:AAE2PgynHDQKvtYcyMmSxAsdihS6TlviGC8"
 
+# This will be the database of video clips
 DATABASE_FILENAME = "memory.db"
+
+# This cache file is used to feed the webserver with data
 CACHE_LOCATION = "frontend/public/data.json"
+
+# As anyone will be able to add the bot and add pictures to your display,
+# you can filter telegram usernames here
+ALLOWED_USERS = []
+
+SERVER_URL = "http://localhost:3000"
 
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-#
+
 # The start command is sent when the bot is started.
 
 # In[ ]:
@@ -63,6 +71,15 @@ def receive(bot, update):
     for elem in elems:
         url = update.message.text[elem.offset:(elem.offset + elem.length)]
 
+        # Rewrite gifv links extension and try that
+        if url[-4:] == "gifv":
+            url = url[:-4] + "mp4"
+            logger.info("Rewrite .gifv to {}".format(url))
+
+        # Convert gif files using ffmpeg
+        if url[-3:] == "gif":
+            url = convert_gif(url)
+
         try:
             link = requests.head(url)
 
@@ -71,8 +88,7 @@ def receive(bot, update):
             update.message.reply_text("Link not valid")
 
         else:
-            if "Content-Type" in link.headers and link.headers["Content-Type"] in ["video/mp4", ]:
-
+            if "Content-Type" in link.headers and link.headers["Content-Type"] in ["video/mp4", "video/webm"]:
                 if add_url(url=url, author=update.message.from_user.first_name):
                     update.message.reply_text("Added video to database")
                 else:
@@ -80,6 +96,28 @@ def receive(bot, update):
 
             else:
                 logger.info("Link not supported: {}".format(link.headers))
+
+import tempfile, ffmpy
+
+def convert_gif(url):
+    rv = False
+    temp = tempfile.NamedTemporaryFile()
+    r = requests.get(url, stream=True)
+    if r.ok:
+        logger.info("Downloading gif to {}...".format(temp.name))
+        for block in r.iter_content(1024):
+            temp.write(block)
+
+        logger.info("Converting...")
+        fname = url.split("/")[-1]
+        ff = ffmpy.FFmpeg(
+            inputs={temp.name: None},
+            outputs={'frontend/public/videos/{}.mp4'.format(fname): '-movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'}
+        )
+        ff.run()
+        rv = "{}/videos/{}.mp4".format(SERVER_URL, fname)
+        logger.info(rv)
+    return rv
 
 
 # Now setup a local database, handled by the Peewee ORM, which allows us to simply handle Python objects for db access instead of writing SQL queries.
@@ -102,7 +140,7 @@ class Video(BaseModel):
     author = CharField()
 
     def __repr__(self):
-        return "Video by '{}' at '{}'".format(self.author, self.url)
+        return "<Video by '{}' at '{}' />".format(self.author, self.url)
 
     def serialize(self):
         rv = {
@@ -138,7 +176,10 @@ def add_url(url, author):
 
 def refresh_cache():
     videos = Video.select().order_by(Video.created.desc())
-    rv = {"videos": {v.id: v.serialize() for v in videos}}
+    rv = {
+        "videos": {v.id: v.serialize() for v in videos},
+        "config": None
+    }
     with open(CACHE_LOCATION, "w") as f:
         json.dump(rv, f)
     logger.info("Cache refreshed. Total {} videos".format(len(rv["videos"])))
