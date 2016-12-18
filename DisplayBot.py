@@ -28,8 +28,7 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-# TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
-TELEGRAM_API_TOKEN = "266345127:AAE2PgynHDQKvtYcyMmSxAsdihS6TlviGC8"
+TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
 
 # This will be the database of video clips
 DATABASE_FILENAME = "memory.db"
