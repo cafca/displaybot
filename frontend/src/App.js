@@ -10,7 +10,8 @@ class App extends Component {
       videos: [],
       currentVideo: null,
       playlist: [],
-      infos: []
+      infos: [],
+      config: {}
     };
 
     window.nextvideo = this.next.bind(this);
@@ -30,6 +31,8 @@ class App extends Component {
   }
 
   load(cb) {
+    // cb is only set if this is the first run during startup
+
     this.loadJSON((data) => {
       let videoIds = Object.keys(this.state.videos);
       let newVideoIds = Object.keys(data.videos);
@@ -105,6 +108,14 @@ class App extends Component {
       window.player.load();
       window.player.play();
     }
+
+    if (prevState.config.timeout_enabled !== this.state.config.timeout_enabled) {
+      if (this.state.config.timeout_enabled) {
+        this.addInfo(this.state.config.timeout_delay + "s timeout");
+      } else {
+        this.addInfo("Timeout disabled");
+      }
+    }
   }
 
   render() {
@@ -117,6 +128,7 @@ class App extends Component {
             onEnded={() => {this.next()}}
             next={() => {this.next()}}
             onKeyDown={(e) => {this.next()}}
+            getConfig={(k) => {return this.state.config[k]}}
           />;
     } else {
       player = "Playlist empty.";
@@ -153,14 +165,21 @@ class VideoPlayer extends React.Component {
       console.log("Updated component source, reload & play..");
       this.player.load();
       this.player.play();
-      clearInterval(this.timerID2);
-      this.timerID2 = setInterval(
-        () => {
-          console.log("Timeout next clip")
-          this.props.next()
-        },
-        10000
-      );
+
+      if ("timerID2" in Object.keys(this)) {
+        clearInterval(this.timerID2);
+      }
+
+      if (this.props.getConfig("timeout_enabled") === true) {
+        console.log("timeout set");
+        this.timerID2 = setInterval(
+          () => {
+            console.log("Timeout next clip")
+            this.props.next()
+          },
+          parseInt(this.props.getConfig("timeout_delay")) * 1000
+        );
+      }
     }
   }
 
