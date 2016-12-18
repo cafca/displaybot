@@ -5,7 +5,7 @@ The Displaybot should show a window on a small wall-mounted display that plays g
 
 First, I need to create a Telegram bot. For this, install the Python Telegram Bot library and the peewee database ORM with
 
-    $ pip install peewee python-telegram-bot --upgrade
+    $ pip install peewee python-telegram-bot ffmpy --upgrade
 
 and then setup logging. I follow the [echobot example](https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py).
 
