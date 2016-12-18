@@ -160,6 +160,11 @@ class VideoPlayer extends React.Component {
     );
   }
 
+  componentWillUnmount() {
+    clearInterval(this.timerID);
+    clearInterval(this.timerID2);
+  }
+
   componentDidUpdate(prevProps, prevState) {
     if (prevProps.source !== this.props.source) {
       console.log("Updated component source, reload & play..");
