@@ -43,6 +43,33 @@ ALLOWED_USERS = []
 
 SERVER_URL = "http://localhost:3000"
 
+# Minimum amount of time to play animation before clipping
+MIN_TIMEOUT = 3
+
+# The above options are all permanent. In addition, there are config options
+# that can be changed within the bot interface
+
+CONFIG_FILE = "config.json"
+
+
+class Config(dict):
+    """Config options."""
+
+    def load(self):
+        """Load config from disk."""
+        with open(CONFIG_FILE, "r") as f:
+            logger.info("Loading config from disk")
+            self.update(json.load(f))
+
+    def save(self):
+        """Save config to disk."""
+        with open(CONFIG_FILE, "w") as f:
+            logger.info("Storing config to disk")
+            json.dump(self, f, indent=2, sort_keys=True)
+
+config = Config()
+config.load()
+
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
@@ -141,7 +168,7 @@ class Video(BaseModel):
         """Friendly display of objects on the CLI."""
         return "<Video by '{}' at '{}' />".format(self.author, self.url)
 
-    def serialize(self):
+    def export(self):
         """For serialization, the datetime needs to be converted first."""
         rv = {
             "url": self.url,
@@ -176,12 +203,37 @@ def refresh_cache():
     """Compute a cached JSON response on disk with all current videos."""
     videos = Video.select().order_by(Video.created.desc())
     rv = {
-        "videos": {v.id: v.serialize() for v in videos},
-        "config": None
+        "videos": {v.id: v.export() for v in videos},
+        "config": config
     }
     with open(CACHE_LOCATION, "w") as f:
-        json.dump(rv, f)
+        json.dump(rv, f, sort_keys=True, indent=2)
     logger.info("Cache refreshed. Total {} videos".format(len(rv["videos"])))
+
+
+def toggle_timeout(bot, update, args=list()):
+    """Toggle the timeout config option."""
+    timeout_delay = 10
+    if len(args) > 0:
+        try:
+            timeout_delay = int(args[0])
+        except ValueError:
+            update.message.reply_text("What")
+        else:
+            timeout_delay = max(timeout_delay, MIN_TIMEOUT)
+            config["timeout_delay"] = timeout_delay
+            config["timeout_enabled"] = True
+    else:
+        config["timeout_enabled"] = not config["timeout_enabled"]
+
+    config.save()
+    refresh_cache()
+
+    val = "after {} seconds".format(timeout_delay) \
+        if config["timeout_enabled"] else "off"
+
+    update.message.reply_text('Timeout {}'.format(val))
+    logger.info("{} Toggled timeout {}".format(update.message.from_user.first_name, val))
 
 
 def main():
@@ -193,6 +245,9 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
+
+    # on different commands - answer in Telegram
+    dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -216,3 +271,4 @@ def main():
 if __name__ == '__main__':
     refresh_cache()
     main()
+    config.save()
