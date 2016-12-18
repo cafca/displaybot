@@ -20,3 +20,9 @@ build
 npm-debug.log
 
 data.json
+
+*.mp4
+
+frontend/public/data.json
+
+frontend/public/data.json
