@@ -22,3 +22,5 @@ npm-debug.log
 data.json
 
 *.mp4
+
+TELEGRAM_TOKEN

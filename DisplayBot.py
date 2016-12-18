@@ -5,7 +5,7 @@ The Displaybot should show a window on a small wall-mounted display that plays g
 
 First, I need to create a Telegram bot. For this, install the Python Telegram Bot library and the peewee database ORM with
 
-    $ pip install peewee python-telegram-bot sqlite3 --upgrade
+    $ pip install peewee python-telegram-bot --upgrade
 
 and then setup logging. I follow the [echobot example](https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py).
 
@@ -28,7 +28,8 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
+with open("TELEGRAM_TOKEN", "r") as f:
+    TELEGRAM_API_TOKEN = f.read().strip()
 
 # This will be the database of video clips
 DATABASE_FILENAME = "memory.db"
