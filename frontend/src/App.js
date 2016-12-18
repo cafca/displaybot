@@ -96,7 +96,7 @@ class App extends Component {
   createPlaylist() {
     console.log("Playlist refill..");
     let videoIds = Object.keys(this.state.videos);
-    let playlist = Array(5).fill(1).map(
+    let playlist = [0, 0, 0, 0, 0].map(
       () => videoIds[Math.floor(Math.pow(Math.random(), 0.8)*videoIds.length)]
     );
     return playlist
