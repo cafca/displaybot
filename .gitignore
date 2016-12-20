@@ -19,8 +19,5 @@ build
 .env
 npm-debug.log
 
-data.json
 
-*.mp4
-
-TELEGRAM_TOKEN
+userdata/*

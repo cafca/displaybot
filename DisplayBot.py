@@ -1,16 +1,18 @@
+
 # coding: utf-8
 
-"""
-The Displaybot should show a window on a small wall-mounted display that plays gifs and videos from a telegram group or tunes to a web radio station.
+# The Displaybot should show a window on a small wall-mounted display that plays gifs and videos from a telegram group or tunes to a web radio station.
+# 
+# First, I need to create a Telegram bot. For this, install the Python Telegram Bot library and the peewee database ORM with
+# 
+#     $ pip install peewee python-telegram-bot sqlite3 ffmpy --upgrade
+# 
+# and then setup logging. I follow the [echobot example](https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py).
+# 
+# Also, setup your Telegram api token below. Get a token by talking to [this bot](https://telegram.me/botfather) on Telegram.
 
-First, I need to create a Telegram bot. For this, install the Python Telegram Bot library and the peewee database ORM with
+# In[17]:
 
-    $ pip install peewee python-telegram-bot ffmpy --upgrade
-
-and then setup logging. I follow the [echobot example](https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py).
-
-Also, setup your Telegram api token below. Get a token by talking to [this bot](https://telegram.me/botfather) on Telegram.
-"""
 import logging
 import requests
 import json
@@ -20,7 +22,7 @@ import datetime
 import peewee
 
 from requests.exceptions import RequestException
-from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 logging.basicConfig(level=logging.DEBUG,
@@ -28,8 +30,7 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-with open("TELEGRAM_TOKEN", "r") as f:
-    TELEGRAM_API_TOKEN = f.read().strip()
+TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
 
 # This will be the database of video clips
 DATABASE_FILENAME = "memory.db"
@@ -43,49 +44,35 @@ ALLOWED_USERS = []
 
 SERVER_URL = "http://localhost:3000"
 
-# Minimum amount of time to play animation before clipping
-MIN_TIMEOUT = 3
 
-# The above options are all permanent. In addition, there are config options
-# that can be changed within the bot interface
-
-CONFIG_FILE = "config.json"
-
-
-class Config(dict):
-    """Config options."""
-
-    def load(self):
-        """Load config from disk."""
-        with open(CONFIG_FILE, "r") as f:
-            logger.info("Loading config from disk")
-            self.update(json.load(f))
-
-    def save(self):
-        """Save config to disk."""
-        with open(CONFIG_FILE, "w") as f:
-            logger.info("Storing config to disk")
-            json.dump(self, f, indent=2, sort_keys=True)
-
-config = Config()
-config.load()
-
-
-# Define a few command handlers. These usually take the two arguments bot and
+# Define a few command handlers for Telegram. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
+# 
+# The start command is sent when the bot is started.
+
+# In[18]:
 
 def start(bot, update):
-    """The start command is sent when the bot is started."""
     update.message.reply_text('Gimme dat gif. Send an .mp4 link!')
 
 
+# Handle errors, just in case
+
+# In[19]:
+
 def error(bot, update, error):
-    """Handle errors, just in case."""
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
+# Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display.
+# 
+# There are special cases:
+# - if `url` ends in `gifv`, that is rewritten to `mp4`
+# - if `url` ends in `gif`, the gif is downloaded and converted to a local `mp4` (see code for that below)
+
+# In[20]:
+
 def receive(bot, update):
-    """Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display."""
     elems = update.message.parse_entities(types=["url"])
     logger.info("Incoming message with {} entities".format(len(elems)))
 
@@ -119,12 +106,13 @@ def receive(bot, update):
                 logger.info("Link not supported: {}".format(link.headers))
 
 
-def convert_gif(url):
-    """
-    In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion.
+# In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion. 
+# 
+# This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in `frontend/public/videos/`, where the frontend script will be able to access it. 
 
-    This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in frontend/public/videos/, where the frontend script will be able to access it.
-    """
+# In[21]:
+
+def convert_gif(url):
     rv = False
     temp = tempfile.NamedTemporaryFile()
     r = requests.get(url, stream=True)
@@ -147,29 +135,23 @@ def convert_gif(url):
 
 # Now setup a local database, handled by the Peewee ORM, which allows us to simply handle Python objects for db access instead of writing SQL queries.
 
+# In[22]:
+
 db = SqliteExtDatabase(DATABASE_FILENAME)
 
-
 class BaseModel(peewee.Model):
-    """Peewee base model."""
-
     class Meta:
         database = db
 
-
 class Video(BaseModel):
-    """A video sent to the bot."""
-
     url = peewee.CharField(unique=True)
     created = peewee.DateTimeField(default=datetime.datetime.now)
     author = peewee.CharField()
 
     def __repr__(self):
-        """Friendly display of objects on the CLI."""
         return "<Video by '{}' at '{}' />".format(self.author, self.url)
 
-    def export(self):
-        """For serialization, the datetime needs to be converted first."""
+    def serialize(self):
         rv = {
             "url": self.url,
             "author": self.author,
@@ -186,11 +168,14 @@ except peewee.OperationalError:
     logger.info("Tables already exist")
 
 
+# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos 
+
+# In[24]:
+
 def add_url(url, author):
-    """A handler to store received videos in the database."""
     try:
         video = Video.create(url=url, author=author)
-    except peewee.IntegrityError:
+    except IntegrityError:
         logger.info("Video already exists {}".format(url))
         video = None
     else:
@@ -198,46 +183,23 @@ def add_url(url, author):
         refresh_cache()
         return video
 
-
 def refresh_cache():
-    """Compute a cached JSON response on disk with all current videos."""
     videos = Video.select().order_by(Video.created.desc())
     rv = {
-        "videos": {v.id: v.export() for v in videos},
-        "config": config
+        "videos": {v.id: v.serialize() for v in videos},
+        "config": None
     }
     with open(CACHE_LOCATION, "w") as f:
-        json.dump(rv, f, sort_keys=True, indent=2)
+        json.dump(rv, f)
     logger.info("Cache refreshed. Total {} videos".format(len(rv["videos"])))
 
 
-def toggle_timeout(bot, update, args=list()):
-    """Toggle the timeout config option."""
-    timeout_delay = 10
-    if len(args) > 0:
-        try:
-            timeout_delay = int(args[0])
-        except ValueError:
-            update.message.reply_text("What")
-        else:
-            timeout_delay = max(timeout_delay, MIN_TIMEOUT)
-            config["timeout_delay"] = timeout_delay
-            config["timeout_enabled"] = True
-    else:
-        config["timeout_enabled"] = not config["timeout_enabled"]
+# Add the main  function, where the handler functions above are registered with the Telegram Bot API and continous polling for new messages as well as the flask server are started.
 
-    config.save()
-    refresh_cache()
-
-    val = "after {} seconds".format(timeout_delay) \
-        if config["timeout_enabled"] else "off"
-
-    update.message.reply_text('Timeout {}'.format(val))
-    logger.info("{} Toggled timeout {}".format(update.message.from_user.first_name, val))
-
+# In[25]:
 
 def main():
-    """Add the main  function, where the handler functions above are registered with the Telegram Bot API and continous polling for new messages as well as the flask server are started."""
+    # Create the EventHandler and pass it your bot's token.
     updater = Updater(TELEGRAM_API_TOKEN)
 
     # Get the dispatcher to register handlers
@@ -245,9 +207,6 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
-
-    # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -264,11 +223,20 @@ def main():
     updater.idle()
 
 
-# Start your bot by saving this notebook as `display-bot.py` and running `$ python display-bot.py`
+# Start your bot by saving this notebook as `display-bot.py` and running `$ python display-bot.py`.
+# 
+# Before the main loop is started, database contents are dumped to the cache file, accessible by the frontend script.
 
 # In[ ]:
 
 if __name__ == '__main__':
     refresh_cache()
     main()
-    config.save()
+
+
+# In[ ]:
+
+main()
+
+
+# 
