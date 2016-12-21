@@ -134,9 +134,9 @@ def download_clip(url, author):
         logger.info("Detected duplicate {}".format(url))
         rv = False
     else:
-        logger.info("Downloading clip to {}...".format(fpath))
         fname = url.split("/")[-1]
         fpath = os.path.join(DATA_DIR, "clips", fname)
+        logger.info("Downloading clip to {}...".format(fpath))
 
         with open(fpath, "w+") as f:
             r = requests.get(url, stream=True)
