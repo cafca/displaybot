@@ -287,6 +287,7 @@ def play_video():
         mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "2>&1 /dev/null")
         logger.info("Finished {}".format(clip["filename"]))
         clip = get_next()
+        sleep(0.1)
 
 
 # ## Main function
@@ -296,6 +297,8 @@ def play_video():
 # In[10]:
 
 def main():
+    from threading import Thread
+
     # Load configuration and video database
     load()
     
@@ -321,12 +324,17 @@ def main():
     updater.start_polling()
     
     # Start the player
-    play_video()
+    player_thread = Thread(target=play_video)
+    player_thread.setDaemon(True)
+    player_thread.start()
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
-    # updater.idle()
+    updater.idle()
+
+
+
 
 
 # Start your bot by saving this notebook as `display-bot.py` and running `$ python display-bot.py`.
