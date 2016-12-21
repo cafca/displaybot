@@ -2,13 +2,13 @@
 # coding: utf-8
 
 # The Displaybot should show a window on a small wall-mounted display that plays gifs and videos from a telegram group or tunes to a web radio station.
-# 
+#
 # First, I need to create a Telegram bot. For this, install the Python Telegram Bot library and the peewee database ORM with
-# 
+#
 #     $ pip install peewee python-telegram-bot sqlite3 ffmpy --upgrade
-# 
+#
 # and then setup logging. I follow the [echobot example](https://github.com/python-telegram-bot/python-telegram-bot/blob/master/examples/echobot2.py).
-# 
+#
 # Also, setup your Telegram api token below. Get a token by talking to [this bot](https://telegram.me/botfather) on Telegram.
 
 # In[1]:
@@ -52,10 +52,10 @@ playnext = None
 
 
 # ## Basic commands for a bot
-# 
+#
 # Define a few command handlers for Telegram. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-# 
+#
 # The start command is sent when the bot is started.
 
 # In[2]:
@@ -72,10 +72,10 @@ def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
-# ## Receive clips from Telegram 
-# 
+# ## Receive clips from Telegram
+#
 # Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display.
-# 
+#
 # There are special cases:
 # - if `url` ends in `gifv`, that is rewritten to `mp4`
 # - if `url` ends in `gif`, the gif is downloaded and converted to a local `mp4` (see code for that below)
@@ -115,8 +115,8 @@ def receive(bot, update):
 
 
 # ## Download and file clips
-# 
-# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos 
+#
+# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos
 
 # In[5]:
 
@@ -132,21 +132,23 @@ def download_clip(url, author):
         logger.info("Detected duplicate {}".format(url))
         rv = False
     else:
+        logger.info("Downloading clip to {}...".format(fpath))
         fname = url.split("/")[-1]
         fpath = os.path.join(DATA_DIR, "clips", fname)
-        
+
         with open(fpath, "w+") as f:
             r = requests.get(url, stream=True)
             if r.ok:
-                logger.info("Downloading clip to {}...".format(fpath))
                 for block in r.iter_content(1024):
                     f.write(block)
-                    
+            else:
+                logger.error("Download failed {}".format(r))
+
         # Convert gif files using ffmpeg
         if url[-3:] == "gif":
             fpath = convert_gif(fpath)
             fname = os.path.basename(fpath)
-            
+
         clip = {
             "url": url,
             "author": author,
@@ -163,14 +165,14 @@ def download_clip(url, author):
 
 def duplicate(url):
     return len([c for c in appdata["clips"] if "url" in c and c["url"] == url]) > 0
-    
+
 
 
 # ## Converting gifs
-# 
-# In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion. 
-# 
-# This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in `frontend/public/videos/`, where the frontend script will be able to access it. 
+#
+# In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion.
+#
+# This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in `frontend/public/videos/`, where the frontend script will be able to access it.
 
 # In[6]:
 
@@ -178,9 +180,9 @@ import ffmpy
 
 def convert_gif(fpath):
     logger.info("Converting gif to mp4...")
-    
+
     new_fpath = fpath + ".mp4"
-    
+
     ff = ffmpy.FFmpeg(
         inputs={fpath: None},
         outputs={new_fpath: '-movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'}
@@ -190,7 +192,7 @@ def convert_gif(fpath):
 
 
 # ## Config persistence
-# 
+#
 # We use a dictionary to store all application data and serialize it in a JSON file.
 
 # In[7]:
@@ -200,7 +202,7 @@ import json
 config_fname = os.path.join(DATA_DIR, "data.json")
 def load():
     global appdata
-    
+
     try:
         with open(config_fname) as f:
             appdata = json.load(f)
@@ -210,20 +212,20 @@ def load():
             "clips": [],
             "config": {}
         }
-        
+
     logger.info("@LOAD\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
     return appdata
-        
+
 def save():
     global appdata
-    
+
     logger.info("@SAVE\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
     with open(config_fname, "w") as f:
         json.dump(appdata, f, indent=2, sort_keys=True)
 
 
 # ## Timeout
-# 
+#
 # This is for the timeout
 
 # In[8]:
@@ -231,7 +233,7 @@ def save():
 def toggle_timeout(bot, update, args=list()):
     """Toggle the timeout config option."""
     global appdata
-    
+
     if len(args) > 0:
         # user has submitted a parameter
         try:
@@ -265,11 +267,11 @@ from random import choice
 def get_next():
     global appdata
     logger.info("In getnext {}".format(appdata))
-    
+
     while len(appdata["clips"]) < 1:
         logger.info("Waiting for clips")
         sleep(10)
-    
+
     if "incoming" in appdata.keys() and appdata["incoming"]:
         rv = appdata["incoming"]
         appdata["incoming"] = None
@@ -281,7 +283,7 @@ def get_next():
 
 def play_video():
     clip = get_next()
-        
+
     while True:
         logger.info("Playing {}".format(clip["filename"]))
         mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "2>&1 /dev/null")
@@ -291,7 +293,7 @@ def play_video():
 
 
 # ## Main function
-# 
+#
 # Add the main  function, where the handler functions above are registered with the Telegram Bot API
 
 # In[10]:
@@ -301,7 +303,7 @@ def main():
 
     # Load configuration and video database
     load()
-    
+
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(TELEGRAM_API_TOKEN)
 
@@ -310,7 +312,7 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
-    
+
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
@@ -322,7 +324,7 @@ def main():
 
     # Start the Bot
     updater.start_polling()
-    
+
     # Start the player
     player_thread = Thread(target=play_video)
     player_thread.setDaemon(True)
@@ -338,7 +340,7 @@ def main():
 
 
 # Start your bot by saving this notebook as `display-bot.py` and running `$ python display-bot.py`.
-# 
+#
 # Before the main loop is started, database contents are dumped to the cache file, accessible by the frontend script.
 
 # In[11]:
@@ -349,7 +351,7 @@ if __name__ == '__main__':
 
 
 # Ok now we have a database of clips that we want to play. We will open them in a subprocess with the default player you have associated with the clips' filetype.
-# 
+#
 # We could just do this with the built-in `subprocess` module, but there's a pythonic alternative called `sh`. Get it with `pip install sh`.
 
 # In[12]:
