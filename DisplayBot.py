@@ -11,46 +11,54 @@
 # 
 # Also, setup your Telegram api token below. Get a token by talking to [this bot](https://telegram.me/botfather) on Telegram.
 
-# In[17]:
+# In[1]:
 
+import os
 import logging
-import requests
-import json
-import tempfile
-import ffmpy
-import datetime
-import peewee
 
-from requests.exceptions import RequestException
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from playhouse.sqlite_ext import SqliteExtDatabase
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(levelname)s - %(message)s')
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# create a file handler
+handler = logging.FileHandler('hello.log')
+handler.setLevel(logging.DEBUG)
+
+# create a logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# add the handlers to the logger
+logger.addHandler(handler)
+
+# Use appdata to store all persistent application state
+appdata = dict()
+DATA_DIR = os.path.join(os.path.realpath("."), "userdata")
 
 TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
-
-# This will be the database of video clips
-DATABASE_FILENAME = "memory.db"
-
-# This cache file is used to feed the webserver with data
-CACHE_LOCATION = "frontend/public/data.json"
+with open(os.path.join(DATA_DIR, "TELEGRAM_API_TOKEN")) as f:
+    TELEGRAM_API_TOKEN = f.read().strip()
 
 # As anyone will be able to add the bot and add pictures to your display,
 # you can filter telegram usernames here
 ALLOWED_USERS = []
 
+SUPPORTED_TYPES = ["video/mp4", "video/webm", "image/gif"]
+
 SERVER_URL = "http://localhost:3000"
 
+playnext = None
 
+
+# ## Basic commands for a bot
+# 
 # Define a few command handlers for Telegram. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 # 
 # The start command is sent when the bot is started.
 
-# In[18]:
+# In[2]:
 
 def start(bot, update):
     update.message.reply_text('Gimme dat gif. Send an .mp4 link!')
@@ -58,23 +66,27 @@ def start(bot, update):
 
 # Handle errors, just in case
 
-# In[19]:
+# In[3]:
 
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
+# ## Receive clips from Telegram 
+# 
 # Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display.
 # 
 # There are special cases:
 # - if `url` ends in `gifv`, that is rewritten to `mp4`
 # - if `url` ends in `gif`, the gif is downloaded and converted to a local `mp4` (see code for that below)
 
-# In[20]:
+# In[4]:
+
+import requests
 
 def receive(bot, update):
     elems = update.message.parse_entities(types=["url"])
-    logger.info("Incoming message with {} entities".format(len(elems)))
+    logger.info("Receiving message with {} url entities".format(len(elems)))
 
     for elem in elems:
         url = update.message.text[elem.offset:(elem.offset + elem.length)]
@@ -84,20 +96,16 @@ def receive(bot, update):
             url = url[:-4] + "mp4"
             logger.info("Rewrite .gifv to {}".format(url))
 
-        # Convert gif files using ffmpeg
-        if url[-3:] == "gif":
-            url = convert_gif(url)
-
         try:
             link = requests.head(url)
 
-        except RequestException:
+        except requests.exceptions.RequestException:
             logger.warning("Link not valid")
             update.message.reply_text("Link not valid")
 
         else:
-            if "Content-Type" in link.headers and link.headers["Content-Type"] in ["video/mp4", "video/webm"]:
-                if add_url(url=url, author=update.message.from_user.first_name):
+            if "Content-Type" in link.headers and link.headers["Content-Type"] in SUPPORTED_TYPES:
+                if download_clip(url=url, author=update.message.from_user.first_name):
                     update.message.reply_text("Added video to database")
                 else:
                     update.message.reply_text("Reposter!")
@@ -106,99 +114,191 @@ def receive(bot, update):
                 logger.info("Link not supported: {}".format(link.headers))
 
 
+# ## Download and file clips
+# 
+# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos 
+
+# In[5]:
+
+import os
+import tempfile
+import datetime
+
+from sh import rm
+
+def download_clip(url, author):
+    global appdata
+    if duplicate(url):
+        logger.info("Detected duplicate {}".format(url))
+        rv = False
+    else:
+        fname = url.split("/")[-1]
+        fpath = os.path.join(DATA_DIR, "clips", fname)
+        
+        with open(fpath, "w+") as f:
+            r = requests.get(url, stream=True)
+            if r.ok:
+                logger.info("Downloading clip to {}...".format(fpath))
+                for block in r.iter_content(1024):
+                    f.write(block)
+                    
+        # Convert gif files using ffmpeg
+        if url[-3:] == "gif":
+            fpath = convert_gif(fpath)
+            fname = os.path.basename(fpath)
+            
+        clip = {
+            "url": url,
+            "author": author,
+            "filename": fname,
+            "created": datetime.datetime.now().isoformat()
+        }
+        appdata["clips"].append(clip)
+        appdata["incoming"] = clip
+        save()
+
+        rv = True
+        logger.info("Saved new clip {} from {}".format(fname, author))
+    return rv
+
+def duplicate(url):
+    return len([c for c in appdata["clips"] if "url" in c and c["url"] == url]) > 0
+    
+
+
+# ## Converting gifs
+# 
 # In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion. 
 # 
 # This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in `frontend/public/videos/`, where the frontend script will be able to access it. 
 
-# In[21]:
+# In[6]:
 
-def convert_gif(url):
-    rv = False
-    temp = tempfile.NamedTemporaryFile()
-    r = requests.get(url, stream=True)
-    if r.ok:
-        logger.info("Downloading gif to {}...".format(temp.name))
-        for block in r.iter_content(1024):
-            temp.write(block)
+import ffmpy
 
-        logger.info("Converting...")
-        fname = url.split("/")[-1]
-        ff = ffmpy.FFmpeg(
-            inputs={temp.name: None},
-            outputs={'frontend/public/videos/{}.mp4'.format(fname): '-movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'}
-        )
-        ff.run()
-        rv = "{}/videos/{}.mp4".format(SERVER_URL, fname)
-        logger.info(rv)
+def convert_gif(fpath):
+    logger.info("Converting gif to mp4...")
+    
+    new_fpath = fpath + ".mp4"
+    
+    ff = ffmpy.FFmpeg(
+        inputs={fpath: None},
+        outputs={new_fpath: '-movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'}
+    )
+    ff.run()
+    return new_fpath
+
+
+# ## Config persistence
+# 
+# We use a dictionary to store all application data and serialize it in a JSON file.
+
+# In[7]:
+
+import json
+
+config_fname = os.path.join(DATA_DIR, "data.json")
+def load():
+    global appdata
+    
+    with open(config_fname) as f:
+        appdata = json.load(f)
+    
+    if len(appdata.keys()) == 0:
+        appdata = {
+            "clips": [],
+            "config": {
+                "timeout": 10
+            }
+        }
+    logger.info("@LOAD\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
+    return appdata
+        
+def save():
+    global appdata
+    
+    logger.info("@SAVE\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
+    with open(config_fname, "w") as f:
+        json.dump(appdata, f, indent=2, sort_keys=True)
+
+
+# ## Timeout
+# 
+# This is for the timeout
+
+# In[8]:
+
+def toggle_timeout(bot, update, args=list()):
+    """Toggle the timeout config option."""
+    global appdata
+    
+    if len(args) > 0:
+        # user has submitted a parameter
+        try:
+            timeout = int(args[0])
+        except ValueError:
+            update.message.reply_text("What")
+        else:
+            timeout = max(timeout, MIN_TIMEOUT)
+            appdata["config"]["timeout"] = timeout
+    else:
+        # toggle timeout
+        if config["timeout"] > 0:
+            config["timeout"] = 0
+        else:
+            config["timeout"] = 10
+
+    save()
+
+    update.message.reply_text('Timeout {}'.format(config["timeout"]))
+    logger.info('Timeout {}'.format(config["timeout"]))
+
+
+# ## Videoplayer
+
+# In[9]:
+
+from sh import mplayer
+from time import sleep
+from random import choice
+
+def get_next():
+    global appdata
+    logger.info("In getnext {}".format(appdata))
+    
+    while len(appdata["clips"]) < 1:
+        logger.info("Waiting for clips")
+        sleep(10)
+    
+    if "incoming" in appdata.keys() and appdata["incoming"]:
+        rv = appdata["incoming"]
+        appdata["incoming"] = None
+        save()
+        logger.info("Playing shortlisted clip {}".format(rv["filename"]))
+    else:
+        rv = choice(appdata["clips"])
     return rv
 
-
-# Now setup a local database, handled by the Peewee ORM, which allows us to simply handle Python objects for db access instead of writing SQL queries.
-
-# In[22]:
-
-db = SqliteExtDatabase(DATABASE_FILENAME)
-
-class BaseModel(peewee.Model):
-    class Meta:
-        database = db
-
-class Video(BaseModel):
-    url = peewee.CharField(unique=True)
-    created = peewee.DateTimeField(default=datetime.datetime.now)
-    author = peewee.CharField()
-
-    def __repr__(self):
-        return "<Video by '{}' at '{}' />".format(self.author, self.url)
-
-    def serialize(self):
-        rv = {
-            "url": self.url,
-            "author": self.author,
-            "created": self.created.isoformat()
-        }
-        return rv
+def play_video():
+    clip = get_next()
+        
+    while True:
+        logger.info("Playing {}".format(clip["filename"]))
+        mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "2>&1 /dev/null")
+        logger.info("Finished {}".format(clip["filename"]))
+        clip = get_next()
 
 
-# Connect to the database and create tables for the models
-db.connect()
-try:
-    db.create_tables([Video])
-except peewee.OperationalError:
-    logger.info("Tables already exist")
+# ## Main function
+# 
+# Add the main  function, where the handler functions above are registered with the Telegram Bot API
 
-
-# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos 
-
-# In[24]:
-
-def add_url(url, author):
-    try:
-        video = Video.create(url=url, author=author)
-    except IntegrityError:
-        logger.info("Video already exists {}".format(url))
-        video = None
-    else:
-        logger.info("Stored new Video {}".format(video))
-        refresh_cache()
-        return video
-
-def refresh_cache():
-    videos = Video.select().order_by(Video.created.desc())
-    rv = {
-        "videos": {v.id: v.serialize() for v in videos},
-        "config": None
-    }
-    with open(CACHE_LOCATION, "w") as f:
-        json.dump(rv, f)
-    logger.info("Cache refreshed. Total {} videos".format(len(rv["videos"])))
-
-
-# Add the main  function, where the handler functions above are registered with the Telegram Bot API and continous polling for new messages as well as the flask server are started.
-
-# In[25]:
+# In[10]:
 
 def main():
+    # Load configuration and video database
+    load()
+    
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(TELEGRAM_API_TOKEN)
 
@@ -207,6 +307,9 @@ def main():
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
+    
+    # on different commands - answer in Telegram
+    dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -216,27 +319,42 @@ def main():
 
     # Start the Bot
     updater.start_polling()
+    
+    # Start the player
+    play_video()
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
-    updater.idle()
+    # updater.idle()
 
 
 # Start your bot by saving this notebook as `display-bot.py` and running `$ python display-bot.py`.
 # 
 # Before the main loop is started, database contents are dumped to the cache file, accessible by the frontend script.
 
-# In[ ]:
+# In[11]:
 
-if __name__ == '__main__':
-    refresh_cache()
-    main()
+# if __name__ == '__main__':
+#     main()
+    
 
 
-# In[ ]:
+# Ok now we have a database of clips that we want to play. We will open them in a subprocess with the default player you have associated with the clips' filetype.
+# 
+# We could just do this with the built-in `subprocess` module, but there's a pythonic alternative called `sh`. Get it with `pip install sh`.
+
+# In[12]:
 
 main()
 
 
-# 
+# In[ ]:
+
+
+
+
+# In[ ]:
+
+
+
