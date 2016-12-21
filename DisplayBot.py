@@ -20,7 +20,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler
 
 # Use appdata to store all persistent application state
 appdata = dict()
-DATA_DIR = "~/displaybot/userdata/"
+
+DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
