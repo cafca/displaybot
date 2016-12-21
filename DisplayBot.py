@@ -268,7 +268,6 @@ from random import choice
 
 def get_next():
     global appdata
-    logger.info("In getnext {}".format(appdata))
 
     while len(appdata["clips"]) < 1:
         logger.info("Waiting for clips")
