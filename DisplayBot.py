@@ -25,12 +25,20 @@ logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler('hello.log')
 handler.setLevel(logging.DEBUG)
 
+# console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+
 # create a logging format
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 
+formatter1 = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+console_handler.setFormatter(formatter1)
+
 # add the handlers to the logger
 logger.addHandler(handler)
+logger.addHandler(console_handler)
 
 # Use appdata to store all persistent application state
 appdata = dict()
@@ -94,7 +102,7 @@ def receive(bot, update):
         # Rewrite gifv links extension and try that
         if url[-4:] == "gifv":
             url = url[:-4] + "mp4"
-            logger.info("Rewrite .gifv to {}".format(url))
+            logger.debug("Rewrite .gifv to {}".format(url))
 
         try:
             link = requests.head(url)
@@ -135,7 +143,7 @@ def download_clip(url, author):
     else:
         fname = url.split("/")[-1]
         fpath = os.path.join(DATA_DIR, "clips", fname)
-        logger.info("Downloading clip to {}...".format(fpath))
+        logger.debug("Downloading clip to {}...".format(fpath))
 
         with open(fpath, "w+") as f:
             r = requests.get(url, stream=True)
@@ -214,13 +222,13 @@ def load():
             "config": {}
         }
 
-    logger.info("@LOAD {} clips".format(len(appdata["clips"])))
+    logger.debug("@LOAD {} clips".format(len(appdata["clips"])))
     return appdata
 
 def save():
     global appdata
 
-    logger.info("@SAVE {} clips".format(len(appdata["clips"])))
+    logger.debug("@SAVE {} clips".format(len(appdata["clips"])))
     with open(config_fname, "w") as f:
         json.dump(appdata, f, indent=2, sort_keys=True)
 
@@ -269,7 +277,7 @@ def get_next():
     global appdata
 
     while len(appdata["clips"]) < 1:
-        logger.info("Waiting for clips")
+        logger.debug("Waiting for clips")
         sleep(10)
 
     if "incoming" in appdata.keys() and appdata["incoming"]:
@@ -287,7 +295,7 @@ def play_video():
     while True:
         logger.info("Playing {}".format(clip["filename"]))
         mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "2>&1 /dev/null")
-        logger.info("Finished {}".format(clip["filename"]))
+        logger.debug("Finished {}".format(clip["filename"]))
         clip = get_next()
         sleep(0.1)
 
