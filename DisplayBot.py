@@ -98,7 +98,7 @@ def receive(bot, update):
 
         try:
             link = requests.head(url)
-            logging.debug(link)
+            logger.debug(link)
 
         except requests.exceptions.RequestException:
             logger.warning("Link not valid")
@@ -106,7 +106,6 @@ def receive(bot, update):
 
         else:
             if "Content-Type" in link.headers and link.headers["Content-Type"] in SUPPORTED_TYPES:
-                logging.info("Preparing download")
                 if download_clip(url=url, author=update.message.from_user.first_name):
                     update.message.reply_text("Added video to database")
                 else:
