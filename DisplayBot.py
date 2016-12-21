@@ -335,9 +335,9 @@ def main():
 
 # In[11]:
 
-# if __name__ == '__main__':
-#     main()
-    
+if __name__ == '__main__':
+    main()
+
 
 
 # Ok now we have a database of clips that we want to play. We will open them in a subprocess with the default player you have associated with the clips' filetype.
@@ -346,7 +346,7 @@ def main():
 
 # In[12]:
 
-main()
+# main()
 
 
 # In[ ]:
