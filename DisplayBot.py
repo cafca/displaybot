@@ -215,13 +215,13 @@ def load():
             "config": {}
         }
 
-    logger.info("@LOAD\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
+    logger.info("@LOAD {} clips".format(len(appdata["clips"])))
     return appdata
 
 def save():
     global appdata
 
-    logger.info("@SAVE\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
+    logger.info("@SAVE {} clips".format(len(appdata["clips"])))
     with open(config_fname, "w") as f:
         json.dump(appdata, f, indent=2, sort_keys=True)
 
