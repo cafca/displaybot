@@ -201,16 +201,16 @@ config_fname = os.path.join(DATA_DIR, "data.json")
 def load():
     global appdata
     
-    with open(config_fname) as f:
-        appdata = json.load(f)
-    
-    if len(appdata.keys()) == 0:
+    try:
+        with open(config_fname) as f:
+            appdata = json.load(f)
+    except IOError, ValueError:
+        logger.info("Bootstrap config loaded")
         appdata = {
             "clips": [],
-            "config": {
-                "timeout": 10
-            }
+            "config": {}
         }
+        
     logger.info("@LOAD\n\n{}".format(json.dumps(appdata, indent=2, sort_keys=True)))
     return appdata
         
