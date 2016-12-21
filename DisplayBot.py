@@ -16,13 +16,18 @@
 import os
 import logging
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler
+
+# Use appdata to store all persistent application state
+appdata = dict()
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "userdata")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 # create a file handler
-handler = logging.FileHandler('hello.log')
+log_dir = os.path.join(DATA_DIR, "hello.log")
+handler = logging.FileHandler(log_dir)
 handler.setLevel(logging.DEBUG)
 
 # console handler
@@ -40,9 +45,8 @@ console_handler.setFormatter(formatter1)
 logger.addHandler(handler)
 logger.addHandler(console_handler)
 
-# Use appdata to store all persistent application state
-appdata = dict()
-DATA_DIR = os.path.join(os.path.realpath("."), "userdata")
+logger.info("Logging to {}".format(log_dir))
+
 
 TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
 with open(os.path.join(DATA_DIR, "TELEGRAM_API_TOKEN")) as f:
