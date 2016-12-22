@@ -299,7 +299,7 @@ def play_video():
 
     while True:
         logger.info("Playing {}".format(clip["filename"]))
-        mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "2>&1 /dev/null")
+        mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "-really-quiet")
         logger.debug("Finished {}".format(clip["filename"]))
         clip = get_next()
         sleep(0.1)
