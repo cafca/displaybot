@@ -16,7 +16,7 @@
 import os
 import logging
 
-from telegram.ext import Updater, CommandHandler, MessageHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler
 
 # Use appdata to store all persistent application state
 appdata = dict()
@@ -109,6 +109,7 @@ def receive(bot, update):
     elems = update.message.parse_entities(types=["url"])
     logger.info("Receiving message with {} url entities".format(len(elems)))
 
+    # Add all URLs in the message
     for elem in elems:
         url = update.message.text[elem.offset:(elem.offset + elem.length)]
 
@@ -204,11 +205,12 @@ def convert_gif(fpath):
     logger.info("Converting gif to mp4...")
 
     new_fpath = fpath + ".mp4"
+    in = { fpath: None }
+    out = {
+        new_fpath: '-pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'
+    }
 
-    ff = ffmpy.FFmpeg(
-        inputs={fpath: None},
-        outputs={new_fpath: '-pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'}
-    )
+    ff = ffmpy.FFmpeg(inputs=in, outputs=out)
     ff.run()
     return new_fpath
 
@@ -248,7 +250,7 @@ def save():
 
 
 
-# ## Videoplayer
+# ## Videoplayer and Radio
 
 # In[9]:
 
@@ -259,6 +261,13 @@ from random import choice
 # ## Radio player
 from threading import Thread
 from telegram.ext import Job
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+def inline_keyboard(options):
+    """Return an inline Keyboard given a dictionary of callback:display pairs."""
+    rv = InlineKeyboardMarkup([[InlineKeyboardButton(v, callback_data=k)]
+        for k, v in options.items()])
+    return rv
 
 class Radio(Thread):
     def __init__(self):
@@ -354,22 +363,51 @@ class Radio(Thread):
             if requested_radio:
                 logger.info("Requesting station {}".format(args[0]))
                 appdata["station_playing"] = args[0]
-                update.message.reply_text("📻 Changed station to {}".format(args[0]))
-
-                # Setup title relay
-                relay_job = Job(Radio.send_title, 1.0, repeat=True, context=update.message.chat_id)
-                job_queue.put(relay_job)
-                logger.info("Job {} enqueued".format(relay_job))
+                job_queue.put(cls.title_relay(update))
                 save()
+                update.message.reply_text(
+                    "📻 Changed station to {}".format(args[0]))
             else:
-                update.message.reply_text("📻 I don't know about {}".format(args[0]))
+                update.message.reply_text(
+                    "📻 I don't know about {}".format(args[0]))
         else:
             appdata["station_playing"] = None
             appdata["station_playing_sent"] = None
-            station_data = "\n".join(["/radio {}".format(k) for k in sorted(appdata["stations"].keys())])
-            update.message.reply_text(
-                "⏹ Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
+
+            # Radio station selector
+            msg = "⏹ Radio turned off.\n\nSelect a station to start."
+            update.message.reply_text(msg,
+                reply_markup=inline_keyboard(appdata["stations"]))
             save()
+
+    @classmethod
+    def telegram_change_station(cls, bot, update, job_queue):
+        # Answer callback from radio station selector
+        global appdata
+        q = update.callback_query
+        station = q.data
+
+        if station in appdata["stations"]:
+            logger.info("Requesting station {} (inline)".format(station))
+            bot.answerCallbackQuery(q.id,
+                text="Tuning to {}...".format(station))
+            appdata["station_playing"] = station
+            job_queue.put(cls.title_relay(update))
+            save()
+            bot.sendMessage(q.message.chat_id,
+                text="📻 Changed station to {}".format(station))
+        else:
+            bot.answerCallbackQuery(q.id)
+            bot.sendMessage(q.message.chat_id,
+                text="I don't know the station '{}'".format(station))
+
+    @classmethod
+    def title_relay(cls, update):
+        # Setup title relay
+        rv = Job(Radio.send_title,
+            1.0, repeat=True, context=update.message.chat_id)
+        return rv
+
 
 
 class VideoPlayer(Thread):
@@ -385,13 +423,18 @@ class VideoPlayer(Thread):
     def run(self):
         current_clip = VideoPlayer.get_next()
         self.logger.info("Playing clip {}".format(current_clip["filename"]))
-        self.player = mplayer(self.filepath(current_clip), "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact)
+        self.player = mplayer(self.filepath(current_clip),
+            "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact)
         self.player.wait()
 
     def stop(self):
         self.logger.debug("Stopping video player")
         if self.player is not None:
-            self.player.terminate()
+            try:
+                self.player.terminate()
+            except OSError as e:
+                self.logger.debug(
+                    "Error stopping video player {}".format(e), exc_info=True)
             self.logger.info("Video player stopped")
         else:
             self.logger.debug("Video player did not play")
@@ -447,6 +490,8 @@ def main():
 
     dp.add_handler(CommandHandler("radio", Radio.telegram_command,
         pass_args=True, pass_job_queue=True))
+    dp.add_handler(CallbackQueryHandler(Radio.telegram_change_station,
+        pass_job_queue=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -486,24 +531,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-# Ok now we have a database of clips that we want to play. We will open them in a subprocess with the default player you have associated with the clips' filetype.
-#
-# We could just do this with the built-in `subprocess` module, but there's a pythonic alternative called `sh`. Get it with `pip install sh`.
-
-# In[12]:
-
-# main()
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
-
 
