@@ -205,12 +205,15 @@ def convert_gif(fpath):
     logger.info("Converting gif to mp4...")
 
     new_fpath = fpath + ".mp4"
-    in = { fpath: None }
-    out = {
-        new_fpath: '-pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'
-    }
 
-    ff = ffmpy.FFmpeg(inputs=in, outputs=out)
+    ff = ffmpy.FFmpeg(
+        inputs={
+            fpath: None
+        },
+        outputs={
+            new_fpath: '-pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2"'
+        }
+    )
     ff.run()
     return new_fpath
 
@@ -376,8 +379,9 @@ class Radio(Thread):
 
             # Radio station selector
             msg = "⏹ Radio turned off.\n\nSelect a station to start."
+            kb = inline_keyboard({k:k for k in appdata["stations"].keys()})
             update.message.reply_text(msg,
-                reply_markup=inline_keyboard(appdata["stations"]))
+                reply_markup=kb))
             save()
 
     @classmethod
