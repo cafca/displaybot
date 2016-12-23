@@ -23,8 +23,11 @@ appdata = dict()
 
 DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("oxo")
 logger.setLevel(logging.DEBUG)
+
+jqlogger = logging.getLogger("JobQueue")
+jqlogger.setLevel(logging.WARNING)
 
 # create a file handler
 log_dir = os.path.join(DATA_DIR, "hello.log")
@@ -36,15 +39,17 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
 # create a logging format
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s %(levelname)s\t: %(message)s')
 handler.setFormatter(formatter)
 
-formatter1 = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+formatter1 = logging.Formatter('%(asctime)s %(levelname)s\t: %(message)s')
 console_handler.setFormatter(formatter1)
 
 # add the handlers to the logger
 logger.addHandler(handler)
+jqlogger.addHandler(handler)
 logger.addHandler(console_handler)
+jqlogger.addHandler(console_handler)
 
 logger.info("Logging to {}".format(log_dir))
 
@@ -313,7 +318,7 @@ class Radio(Thread):
         Thread.__init__(self)
         self.url = None
         self.player = None
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger("oxo")
 
     def run(self):
         self.stopped = False
@@ -349,7 +354,7 @@ class Radio(Thread):
 
     @classmethod
     def interact(cls, line, stdin):
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger("oxo")
         if line.startswith("ICY"):
             logger.debug("Found ICY data: {}".format(line))
             s = "StreamTitle="
@@ -370,7 +375,7 @@ class Radio(Thread):
 
     @classmethod
     def send_title(cls, bot, job):
-        logger = logging.getLogger("__main__")
+        logger = logging.getLogger("oxo")
         global appdata
         t = appdata["station_title"]
         t0 = appdata["station_title_sent"]
