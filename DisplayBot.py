@@ -458,8 +458,8 @@ def main():
 
     # Start the player
     gif_player = Thread(target=play_video)
-    # gif_player.setDaemon(True)
-    # gif_player.start()
+    gif_player.setDaemon(True)
+    gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
