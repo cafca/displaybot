@@ -373,8 +373,8 @@ class Radio(Thread):
         logger = logging.getLogger(__name__)
         global appdata
         if job.title != appdata["station_title"]:
+            logger.debug("Title changed from '{}' to '{}'".format(job.title, appdata["station_title"]))
             job.title = appdata["station_title"]
-            logger.debug("Sending changed title {}".format(job.title))
             msg = "▶️ Now playing {}".format(job.title)
             bot.sendMessage(chat_id=job.context, text=msg)
 
@@ -403,7 +403,7 @@ def radio_command(bot, update, job_queue, args=list()):
 
             # Setup title relay
             relay_job = Job(Radio.send_title, 3.0, repeat=True, context=update.message.chat_id)
-            relay_job.title = None
+            relay_job.title = appdata["station_title"]
             job_queue.put(relay_job)
             logger.info("Job {} enqueued".format(relay_job))
             save()
