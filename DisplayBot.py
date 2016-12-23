@@ -325,9 +325,10 @@ class Radio(Thread):
         t = appdata["station_title"]
         t0 = appdata["station_title_sent"]
         if t != t0:
+            if t:
+                msg = "▶️ Now playing {}".format(t)
+                bot.sendMessage(chat_id=job.context, text=msg)
             logger.debug("Title changed from '{}' to '{}'".format(t0, t))
-            msg = "▶️ Now playing {}".format(t)
-            bot.sendMessage(chat_id=job.context, text=msg)
             appdata["station_title_sent"] = t
             save()
 
