@@ -331,7 +331,7 @@ class Radio(Thread):
 
                 if self.url is not None:
                     self.logger.info("Playing {}: {}".format(self.station, self.url))
-                    self.player = mplayer(self.url, _bg=True)
+                    self.player = mplayer(self.url, "-quiet", _bg=True)
                 current_url = self.url
             sleep(1)
 
