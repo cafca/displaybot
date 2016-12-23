@@ -306,38 +306,81 @@ def play_video():
 
 # ## Radio player
 from threading import Thread
+from telegram.ext import Job
 
 class Radio(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.url = None
-        self.station = None
         self.player = None
         self.logger = logging.getLogger(__name__)
 
     def run(self):
         self.stopped = False
         current_url = None
+        title = None
+        self.reset_title()
+
         while not self.stopped:
-            self.update_url()
+            self.update()
             if current_url != self.url:
-                self.logger.info("Station changed")
+                self.logger.debug("Station changed")
                 if self.player is not None:
                     self.player.terminate()
                     self.logger.info("Stopped running radio")
                     self.player = None
                 else:
-                    self.logger.info("No radio playing previously")
+                    self.logger.debug("No radio playing previously")
 
                 if self.url is not None:
-                    self.logger.info("Playing {}: {}".format(self.station, self.url))
-                    self.player = mplayer(self.url, "-quiet", _bg=True)
+                    self.logger.info("Playing {}".format(self.url))
+                    self.player = mplayer(self.url, "-quiet",
+                        _bg=True,
+                        _out=self.interact,
+                        _done=lambda c,s,e: self.logger.info("Completed {} - {} with {}".format(c,s,e))
+                    )
                 current_url = self.url
+
+            elif title != self.title:
+                title = self.title
+                self.logger.info("Title is {}".format(title))
+
             sleep(1)
 
-    def update_url(self):
+    @classmethod
+    def interact(cls, line, stdin):
+        logger = logging.getLogger(__name__)
+        if line.startswith("ICY"):
+            logger.debug("Found ICY data: {}".format(line))
+            s = "StreamTitle="
+            start = line.find(s) + len(s) + 1
+            end = line.find(";", start) - 1
+            if start and end:
+                title = line[start:end]
+                logger.debug("Found title in ICY: {}".format(title))
+                if len(title) > 0:
+                    global appdata
+                    appdata["station_title"] = title
+
+
+    def update(self):
         global appdata
         self.url = appdata["stations"].get(appdata["station_playing"])
+        self.title = appdata.get("station_title")
+
+    @classmethod
+    def send_title(cls, bot, job):
+        logger = logging.getLogger(__name__)
+        global appdata
+        if job.title != appdata["station_title"]:
+            job.title = appdata["station_title"]
+            logger.debug("Sending changed title {}".format(job.title))
+            msg = "▶️ Now playing {}".format(job.title)
+            bot.sendMessage(chat_id=job.context, text=msg)
+
+    def reset_title(self):
+        global appdata
+        appdata["station_title"] = None
 
     def stop(self):
         self.logger.info("Stopping radio player...")
@@ -348,13 +391,21 @@ class Radio(Thread):
         else:
             self.logger.info("Radio did not play")
 
-def radio_command(bot, update, args=list()):
+def radio_command(bot, update, job_queue, args=list()):
     global appdata
+
     if len(args) > 0:
         requested_radio = appdata["stations"].get(args[0])
         if requested_radio:
+            logger.info("Requesting station {}".format(args[0]))
             appdata["station_playing"] = args[0]
             update.message.reply_text("📻 Changed station to {}".format(args[0]))
+
+            # Setup title relay
+            relay_job = Job(Radio.send_title, 3.0, repeat=True, context=update.message.chat_id)
+            relay_job.title = None
+            job_queue.put(relay_job)
+            logger.info("Job {} enqueued".format(relay_job))
             save()
         else:
             update.message.reply_text("📻 I don't know about {}".format(args[0]))
@@ -362,7 +413,7 @@ def radio_command(bot, update, args=list()):
         appdata["station_playing"] = None
         station_data = "\n".join(["/radio {}".format(k) for k in appdata["stations"].keys()])
         update.message.reply_text(
-            "📻 Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
+            "⏹ Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
         save()
 
 
@@ -390,7 +441,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
-    dp.add_handler(CommandHandler("radio", radio_command, pass_args=True))
+    dp.add_handler(CommandHandler("radio", radio_command,
+        pass_args=True, pass_job_queue=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -403,8 +455,8 @@ def main():
 
     # Start the player
     gif_player = Thread(target=play_video)
-    gif_player.setDaemon(True)
-    gif_player.start()
+    # gif_player.setDaemon(True)
+    # gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
