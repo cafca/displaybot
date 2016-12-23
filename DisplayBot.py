@@ -304,6 +304,68 @@ def play_video():
         clip = get_next()
         sleep(0.1)
 
+# ## Radio player
+from threading import Thread
+
+class Radio(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.url = None
+        self.station = None
+        self.player = None
+        self.logger = logging.getLogger(__name__)
+
+    def run(self):
+        self.stopped = False
+        current_url = None
+        while not self.stopped:
+            self.update_url()
+            if current_url != self.url:
+                self.logger.info("Station changed")
+                if self.player is not None:
+                    self.player.terminate()
+                    self.logger.info("Stopped running radio")
+                    self.player = None
+                else:
+                    self.logger.info("No radio playing previously")
+
+                if self.url is not None:
+                    self.logger.info("Playing {}: {}".format(self.station, self.url))
+                    self.player = mplayer(self.url, _bg=True)
+                current_url = self.url
+            sleep(1)
+
+    def update_url(self):
+        global appdata
+        self.url = appdata["stations"].get(appdata["station_playing"])
+
+    def stop(self):
+        self.logger.info("Stopping radio player...")
+        self.stopped = True
+        if self.player is not None:
+            self.player.terminate()
+            self.logger.info("Radio stopped")
+        else:
+            self.logger.info("Radio did not play")
+
+def radio_command(bot, update, args=list()):
+    global appdata
+    if len(args) > 0:
+        requested_radio = appdata["stations"].get(args[0])
+        if requested_radio:
+            appdata["station_playing"] = args[0]
+            update.message.reply_text("Changed station to {}".format(args[0]))
+            save()
+        else:
+            update.message.reply_text("I don't know {}".format(args[0]))
+    else:
+        appdata["station_playing"] = None
+        station_data = "\n".join(["/radio {}".format(k) for k in appdata["stations"].keys()])
+        update.message.reply_text(
+            "Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
+        save()
+
+
 
 # ## Main function
 #
@@ -312,7 +374,6 @@ def play_video():
 # In[10]:
 
 def main():
-    from threading import Thread
 
     # Load configuration and video database
     load()
@@ -329,6 +390,8 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
 
+    dp.add_handler(CommandHandler("radio", radio_command, pass_args=True))
+
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
 
@@ -339,14 +402,20 @@ def main():
     updater.start_polling()
 
     # Start the player
-    player_thread = Thread(target=play_video)
-    player_thread.setDaemon(True)
-    player_thread.start()
+    gif_player = Thread(target=play_video)
+    gif_player.setDaemon(True)
+    gif_player.start()
+
+    radio = Radio()
+    radio.setDaemon(True)
+    radio.start()
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
+
+    radio.stop()
 
 
 
