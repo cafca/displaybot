@@ -384,7 +384,7 @@ class VideoPlayer(Thread):
     def run(self):
         current_clip = VideoPlayer.get_next()
         self.logger.info("Playing clip {}".format(current_clip["filename"]))
-        self.player = mplayer(self.filepath(current_clip), "-slave", "-fs", _bg=True, _out=self.interact)
+        self.player = mplayer(self.filepath(current_clip), "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact)
         self.player.wait()
 
     def stop(self):
@@ -400,10 +400,9 @@ class VideoPlayer(Thread):
         START_PLAYBACK = "Starting playback..."
 
         logger = logging.getLogger("oxo")
-
         if START_PLAYBACK in line:
             path = cls.filepath(cls.get_next())
-            cmd = "loadfile {} 1\nvo_fullscreen 1\n".format(path)
+            cmd = "loadfile {} 1\n".format(path)
             logger.info("Enqueuing clip '{}'".format(path))
             stdin.put(cmd)
 
