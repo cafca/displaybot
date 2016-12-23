@@ -370,7 +370,7 @@ class Radio(Thread):
 
     @classmethod
     def send_title(cls, bot, job):
-        logger = logging.getLogger(__name__)
+        logger = logging.getLogger("__main__")
         global appdata
         t = appdata["station_title"]
         t0 = appdata["station_title_sent"]
