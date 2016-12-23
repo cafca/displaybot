@@ -39,10 +39,13 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 
 # create a logging format
-formatter = logging.Formatter('%(asctime)s %(levelname)s\t: %(message)s')
+logfmt = '%(asctime)s %(levelname)s\t: %(message)s'
+tmfmt = "%m/%d %H:%M:%S"
+formatter = logging.Formatter(logfmt, tmfmt)
 handler.setFormatter(formatter)
 
-formatter1 = logging.Formatter('%(asctime)s %(levelname)s\t: %(message)s')
+logfmt1 = '%(asctime)s: %(message)s'
+formatter1 = logging.Formatter(logfmt1, tmfmt)
 console_handler.setFormatter(formatter1)
 
 # add the handlers to the logger
@@ -243,36 +246,6 @@ def save():
         json.dump(appdata, f, indent=2, sort_keys=True)
 
 
-# ## Timeout
-#
-# This is for the timeout
-
-# In[8]:
-
-def toggle_timeout(bot, update, args=list()):
-    """Toggle the timeout config option."""
-    global appdata
-
-    if len(args) > 0:
-        # user has submitted a parameter
-        try:
-            timeout = int(args[0])
-        except ValueError:
-            update.message.reply_text("What")
-        else:
-            timeout = max(timeout, MIN_TIMEOUT)
-            appdata["config"]["timeout"] = timeout
-    else:
-        # toggle timeout
-        if config["timeout"] > 0:
-            config["timeout"] = 0
-        else:
-            config["timeout"] = 10
-
-    save()
-
-    update.message.reply_text('Timeout {}'.format(config["timeout"]))
-    logger.info('Timeout {}'.format(config["timeout"]))
 
 
 # ## Videoplayer
@@ -282,32 +255,6 @@ def toggle_timeout(bot, update, args=list()):
 from sh import mplayer
 from time import sleep
 from random import choice
-
-def get_next():
-    global appdata
-
-    while len(appdata["clips"]) < 1:
-        logger.debug("Waiting for clips")
-        sleep(10)
-
-    if "incoming" in appdata.keys() and appdata["incoming"]:
-        rv = appdata["incoming"]
-        appdata["incoming"] = None
-        save()
-        logger.info("Playing shortlisted clip {}".format(rv["filename"]))
-    else:
-        rv = choice(appdata["clips"])
-    return rv
-
-def play_video():
-    clip = get_next()
-
-    while True:
-        logger.info("Playing {}".format(clip["filename"]))
-        mplayer(os.path.join(DATA_DIR, "clips", clip["filename"]), "-fs", "-really-quiet")
-        logger.debug("Finished {}".format(clip["filename"]))
-        clip = get_next()
-        sleep(0.1)
 
 # ## Radio player
 from threading import Thread
@@ -341,9 +288,7 @@ class Radio(Thread):
                     self.logger.info("Playing {}".format(self.url))
                     self.player = mplayer(self.url, "-quiet",
                         _bg=True,
-                        _out=self.interact,
-                        _done=lambda c,s,e: self.logger.info("Completed {} - {} with {}".format(c,s,e))
-                    )
+                        _out=self.interact)
                 current_url = self.url
 
             elif title != self.title:
@@ -391,38 +336,92 @@ class Radio(Thread):
         appdata["station_title"] = None
 
     def stop(self):
-        self.logger.info("Stopping radio player...")
+        self.logger.debug("Stopping radio player...")
         self.stopped = True
         if self.player is not None:
             self.player.terminate()
             self.logger.info("Radio stopped")
         else:
-            self.logger.info("Radio did not play")
+            self.logger.debug("Radio did not play")
 
-def radio_command(bot, update, job_queue, args=list()):
-    global appdata
+    @classmethod
+    def telegram_command(cls, bot, update, job_queue, args=list()):
+        global appdata
 
-    if len(args) > 0:
-        requested_radio = appdata["stations"].get(args[0])
-        if requested_radio:
-            logger.info("Requesting station {}".format(args[0]))
-            appdata["station_playing"] = args[0]
-            update.message.reply_text("📻 Changed station to {}".format(args[0]))
+        if len(args) > 0:
+            requested_radio = appdata["stations"].get(args[0])
+            if requested_radio:
+                logger.info("Requesting station {}".format(args[0]))
+                appdata["station_playing"] = args[0]
+                update.message.reply_text("📻 Changed station to {}".format(args[0]))
 
-            # Setup title relay
-            relay_job = Job(Radio.send_title, 1.0, repeat=True, context=update.message.chat_id)
-            job_queue.put(relay_job)
-            logger.info("Job {} enqueued".format(relay_job))
-            save()
+                # Setup title relay
+                relay_job = Job(Radio.send_title, 1.0, repeat=True, context=update.message.chat_id)
+                job_queue.put(relay_job)
+                logger.info("Job {} enqueued".format(relay_job))
+                save()
+            else:
+                update.message.reply_text("📻 I don't know about {}".format(args[0]))
         else:
-            update.message.reply_text("📻 I don't know about {}".format(args[0]))
-    else:
-        appdata["station_playing"] = None
-        appdata["station_playing_sent"] = None
-        station_data = "\n".join(["/radio {}".format(k) for k in sorted(appdata["stations"].keys())])
-        update.message.reply_text(
-            "⏹ Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
-        save()
+            appdata["station_playing"] = None
+            appdata["station_playing_sent"] = None
+            station_data = "\n".join(["/radio {}".format(k) for k in sorted(appdata["stations"].keys())])
+            update.message.reply_text(
+                "⏹ Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
+            save()
+
+
+class VideoPlayer(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.logger = logging.getLogger("oxo")
+        self.close_player = False
+
+    @classmethod
+    def filepath(self, current_clip):
+        return os.path.join(DATA_DIR, "clips", current_clip["filename"])
+
+    def run(self):
+        current_clip = VideoPlayer.get_next()
+        self.logger.info("Playing clip {}".format(current_clip["filename"]))
+        self.player = mplayer(self.filepath(current_clip), "-slave", "-fs", _bg=True, _out=self.interact)
+        self.player.wait()
+
+    def stop(self):
+        self.logger.debug("Stopping video player")
+        if self.player is not None:
+            self.player.terminate()
+            self.logger.info("Video player stopped")
+        else:
+            self.logger.debug("Video player did not play")
+
+    @classmethod
+    def interact(cls, line, stdin):
+        START_PLAYBACK = "Starting playback..."
+
+        logger = logging.getLogger("oxo")
+
+        if START_PLAYBACK in line:
+            path = cls.filepath(cls.get_next())
+            cmd = "loadfile {} 1\nvo_fullscreen 1\n".format(path)
+            logger.info("Enqueuing clip '{}'".format(path))
+            stdin.put(cmd)
+
+    @classmethod
+    def get_next(cls):
+        global appdata
+        logger = logging.getLogger("oxo")
+
+        if "incoming" in appdata.keys() and appdata["incoming"]:
+            rv = appdata["incoming"]
+            appdata["incoming"] = None
+            save()
+            logger.info("Enqueuing shortlisted clip {}".format(rv["filename"]))
+        elif len(appdata["clips"]) > 0:
+            rv = choice(appdata["clips"])
+        else:
+            rv = None
+        return rv
 
 
 
@@ -446,10 +445,7 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
 
-    # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("timeout", toggle_timeout, pass_args=True))
-
-    dp.add_handler(CommandHandler("radio", radio_command,
+    dp.add_handler(CommandHandler("radio", Radio.telegram_command,
         pass_args=True, pass_job_queue=True))
 
     # on noncommand i.e message - echo the message on Telegram
@@ -462,7 +458,7 @@ def main():
     updater.start_polling()
 
     # Start the player
-    gif_player = Thread(target=play_video)
+    gif_player = VideoPlayer()
     gif_player.setDaemon(True)
     gif_player.start()
 
@@ -475,6 +471,7 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
+    gif_player.stop()
     radio.stop()
 
 
