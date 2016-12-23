@@ -120,9 +120,9 @@ def receive(bot, update):
         else:
             if "Content-Type" in link.headers and link.headers["Content-Type"] in SUPPORTED_TYPES:
                 if download_clip(url=url, author=update.message.from_user.first_name):
-                    update.message.reply_text("Added video to database")
+                    update.message.reply_text("👾 Added video to database.")
                 else:
-                    update.message.reply_text("Reposter!")
+                    update.message.reply_text("👾 Reposter!")
 
             else:
                 logger.info("Link not supported: {}".format(link.headers))
@@ -354,15 +354,15 @@ def radio_command(bot, update, args=list()):
         requested_radio = appdata["stations"].get(args[0])
         if requested_radio:
             appdata["station_playing"] = args[0]
-            update.message.reply_text("Changed station to {}".format(args[0]))
+            update.message.reply_text("📻 Changed station to {}".format(args[0]))
             save()
         else:
-            update.message.reply_text("I don't know {}".format(args[0]))
+            update.message.reply_text("📻 I don't know about {}".format(args[0]))
     else:
         appdata["station_playing"] = None
         station_data = "\n".join(["/radio {}".format(k) for k in appdata["stations"].keys()])
         update.message.reply_text(
-            "Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
+            "📻 Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
         save()
 
 
