@@ -372,11 +372,14 @@ class Radio(Thread):
     def send_title(cls, bot, job):
         logger = logging.getLogger(__name__)
         global appdata
-        if job.title != appdata["station_title"]:
-            logger.debug("Title changed from '{}' to '{}'".format(job.title, appdata["station_title"]))
-            job.title = appdata["station_title"]
-            msg = "▶️ Now playing {}".format(job.title)
+        t = appdata["station_title"]
+        t0 = appdata["station_title_sent"]
+        if t != t0:
+            logger.debug("Title changed from '{}' to '{}'".format(t0, t))
+            msg = "▶️ Now playing {}".format(t)
             bot.sendMessage(chat_id=job.context, text=msg)
+            appdata["station_title_sent"] = t
+            save()
 
     def reset_title(self):
         global appdata
@@ -402,8 +405,7 @@ def radio_command(bot, update, job_queue, args=list()):
             update.message.reply_text("📻 Changed station to {}".format(args[0]))
 
             # Setup title relay
-            relay_job = Job(Radio.send_title, 3.0, repeat=True, context=update.message.chat_id)
-            relay_job.title = appdata["station_title"]
+            relay_job = Job(Radio.send_title, 1.0, repeat=True, context=update.message.chat_id)
             job_queue.put(relay_job)
             logger.info("Job {} enqueued".format(relay_job))
             save()
@@ -411,7 +413,8 @@ def radio_command(bot, update, job_queue, args=list()):
             update.message.reply_text("📻 I don't know about {}".format(args[0]))
     else:
         appdata["station_playing"] = None
-        station_data = "\n".join(["/radio {}".format(k) for k in appdata["stations"].keys()])
+        appdata["station_playing_sent"] = None
+        station_data = "\n".join(["/radio {}".format(k) for k in sorted(appdata["stations"].keys())])
         update.message.reply_text(
             "⏹ Radio turned off.\n\nAvailable stations:\n{}".format(station_data))
         save()
