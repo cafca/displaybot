@@ -106,11 +106,23 @@ def error(bot, update, error):
 import requests
 
 def receive(bot, update):
-    elems = update.message.parse_entities(types=["url"])
-    logger.info("Receiving message with {} url entities".format(len(elems)))
+    # Add attachments
+    doc = update.message.document
+    try:
+        if doc:
+            logger.debug("Processing attachment")
+            file_data = bot.getFile(doc.file_id)
+            logger.debug("Downloading {}".format(file_data["file_path"]))
+            download_clip(file_data["file_path"], update, doc["mime_type"],
+                fname=doc["file_name"])
+    except Exception as e:
+        logger.error(e, exc_info=True)
+
 
     # Add all URLs in the message
+    elems = update.message.parse_entities(types=["url"])
     for elem in elems:
+        logger.info("Processing message with {} url entities".format(len(elems)))
         url = update.message.text[elem.offset:(elem.offset + elem.length)]
 
         # Rewrite gifv links extension and try that
@@ -127,12 +139,11 @@ def receive(bot, update):
             update.message.reply_text("Link not valid")
 
         else:
-            if "Content-Type" in link.headers and link.headers["Content-Type"] in SUPPORTED_TYPES:
-                if download_clip(url=url, author=update.message.from_user.first_name):
-                    update.message.reply_text("👾 Added video to database.")
-                else:
-                    update.message.reply_text("👾 Reposter!")
-
+            if "Content-Type" in link.headers:
+                download_clip(
+                    url=url,
+                    update=update,
+                    content_type=link.headers["Content-Type"])
             else:
                 logger.info("Link not supported: {}".format(link.headers))
 
@@ -149,13 +160,20 @@ import datetime
 
 from sh import rm
 
-def download_clip(url, author):
+def download_clip(url, update, content_type, fname=None):
     global appdata
-    if duplicate(url):
-        logger.info("Detected duplicate {}".format(url))
-        rv = False
-    else:
+
+    if not fname:
         fname = url.split("/")[-1]
+
+    author=update.message.from_user.first_name
+    if content_type not in SUPPORTED_TYPES:
+        logger.info("Link not supported: \n{}\nType{}".format(
+            url, content_type))
+    if duplicate(fname):
+        logger.info("Detected duplicate {}".format(fname))
+        update.message.reply_text("👾 Reposter!")
+    else:
         fpath = os.path.join(DATA_DIR, "clips", fname)
         logger.debug("Downloading clip to {}...".format(fpath))
 
@@ -182,12 +200,13 @@ def download_clip(url, author):
         appdata["incoming"] = clip
         save()
 
-        rv = True
+        update.message.reply_text("👾 Added video to database.")
         logger.info("Saved new clip {} from {}".format(fname, author))
-    return rv
 
-def duplicate(url):
-    return len([c for c in appdata["clips"] if "url" in c and c["url"] == url]) > 0
+
+def duplicate(filename):
+    return len([c for c in appdata["clips"]
+        if "filename" in c and c["filename"] == filename]) > 0
 
 
 
@@ -361,28 +380,15 @@ class Radio(Thread):
     def telegram_command(cls, bot, update, job_queue, args=list()):
         global appdata
 
-        if len(args) > 0:
-            requested_radio = appdata["stations"].get(args[0])
-            if requested_radio:
-                logger.info("Requesting station {}".format(args[0]))
-                appdata["station_playing"] = args[0]
-                job_queue.put(cls.title_relay(update))
-                save()
-                update.message.reply_text(
-                    "📻 Changed station to {}".format(args[0]))
-            else:
-                update.message.reply_text(
-                    "📻 I don't know about {}".format(args[0]))
-        else:
-            appdata["station_playing"] = None
-            appdata["station_playing_sent"] = None
+        appdata["station_playing"] = None
+        appdata["station_playing_sent"] = None
+        save()
 
-            # Radio station selector
-            msg = "⏹ Radio turned off.\n\nSelect a station to start."
-            kb = inline_keyboard({k:k for k in appdata["stations"].keys()})
-            update.message.reply_text(msg,
-                reply_markup=kb))
-            save()
+        # Radio station selector
+        msg = "⏹ Radio turned off.\n\nSelect a station to start."
+        kb = inline_keyboard({k:k for k in appdata["stations"].keys()})
+        update.message.reply_text(msg,
+            reply_markup=kb)
 
     @classmethod
     def telegram_change_station(cls, bot, update, job_queue):
@@ -390,27 +396,28 @@ class Radio(Thread):
         global appdata
         q = update.callback_query
         station = q.data
+        try:
+            if station in appdata["stations"]:
+                logger.info("Requesting station {} (inline)".format(station))
+                bot.answerCallbackQuery(q.id,
+                    text="Tuning to {}...".format(station))
 
-        if station in appdata["stations"]:
-            logger.info("Requesting station {} (inline)".format(station))
-            bot.answerCallbackQuery(q.id,
-                text="Tuning to {}...".format(station))
-            appdata["station_playing"] = station
-            job_queue.put(cls.title_relay(update))
-            save()
-            bot.sendMessage(q.message.chat_id,
-                text="📻 Changed station to {}".format(station))
-        else:
-            bot.answerCallbackQuery(q.id)
-            bot.sendMessage(q.message.chat_id,
-                text="I don't know the station '{}'".format(station))
+                appdata["station_playing"] = station
+                rv = Job(Radio.send_title,
+                    1.0, repeat=True, context=q.message.chat_id)
+                job_queue.put(rv)
+                save()
 
-    @classmethod
-    def title_relay(cls, update):
-        # Setup title relay
-        rv = Job(Radio.send_title,
-            1.0, repeat=True, context=update.message.chat_id)
-        return rv
+                bot.editMessageText(
+                    text="📻 Changed station to {}.".format(station),
+                    chat_id=q.message.chat_id,
+                    message_id=q.message.message_id)
+            else:
+                bot.answerCallbackQuery(q.id)
+                bot.sendMessage(q.message.chat_id,
+                    text="I don't know about '{}'".format(station))
+        except Exception as e:
+            logger.error(e, exc_info=True)
 
 
 
