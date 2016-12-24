@@ -291,6 +291,14 @@ def inline_keyboard(options):
         for k, v in options.items()])
     return rv
 
+def log_exceptions(func):
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            logger.error(e, exc_info=True)
+    return wrapper
+
 class Radio(Thread):
     def __init__(self):
         Thread.__init__(self)
@@ -298,6 +306,7 @@ class Radio(Thread):
         self.player = None
         self.logger = logging.getLogger("oxo")
 
+    @log_exceptions
     def run(self):
         self.stopped = False
         current_url = None
@@ -391,34 +400,31 @@ class Radio(Thread):
             reply_markup=kb)
 
     @classmethod
+    @log_exceptions
     def telegram_change_station(cls, bot, update, job_queue):
         # Answer callback from radio station selector
         global appdata
         q = update.callback_query
         station = q.data
-        try:
-            if station in appdata["stations"]:
-                logger.info("Requesting station {} (inline)".format(station))
-                bot.answerCallbackQuery(q.id,
-                    text="Tuning to {}...".format(station))
+        if station in appdata["stations"]:
+            logger.info("Requesting station {} (inline)".format(station))
+            bot.answerCallbackQuery(q.id,
+                text="Tuning to {}...".format(station))
 
-                appdata["station_playing"] = station
-                rv = Job(Radio.send_title,
-                    1.0, repeat=True, context=q.message.chat_id)
-                job_queue.put(rv)
-                save()
+            appdata["station_playing"] = station
+            rv = Job(Radio.send_title,
+                1.0, repeat=True, context=q.message.chat_id)
+            job_queue.put(rv)
+            save()
 
-                bot.editMessageText(
-                    text="📻 Changed station to {}.".format(station),
-                    chat_id=q.message.chat_id,
-                    message_id=q.message.message_id)
-            else:
-                bot.answerCallbackQuery(q.id)
-                bot.sendMessage(q.message.chat_id,
-                    text="I don't know about '{}'".format(station))
-        except Exception as e:
-            logger.error(e, exc_info=True)
-
+            bot.editMessageText(
+                text="📻 Changed station to {}.".format(station),
+                chat_id=q.message.chat_id,
+                message_id=q.message.message_id)
+        else:
+            bot.answerCallbackQuery(q.id)
+            bot.sendMessage(q.message.chat_id,
+                text="I don't know about '{}'".format(station))
 
 
 class VideoPlayer(Thread):
@@ -458,7 +464,7 @@ class VideoPlayer(Thread):
         if START_PLAYBACK in line:
             path = cls.filepath(cls.get_next())
             cmd = "loadfile {} 1\n".format(path)
-            logger.info("Enqueuing clip '{}'".format(path))
+            logger.info("Enqueued clip {}".format(path))
             stdin.put(cmd)
 
     @classmethod
