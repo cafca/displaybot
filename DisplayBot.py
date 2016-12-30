@@ -131,7 +131,7 @@ def receive(bot, update):
             logger.debug("Rewrite .gifv to {}".format(url))
 
         try:
-            link = requests.head(url)
+            link = requests.head(url, allow_redirects=True)
             logger.debug(link)
 
         except requests.exceptions.RequestException:
@@ -166,7 +166,7 @@ def download_clip(url, update, content_type, fname=None):
     if not fname:
         fname = url.split("/")[-1]
 
-    author=update.message.from_user.first_name
+    author = update.message.from_user.first_name
     if content_type not in SUPPORTED_TYPES:
         logger.info("Link not supported: \n{}\nType{}".format(
             url, content_type))
@@ -179,6 +179,7 @@ def download_clip(url, update, content_type, fname=None):
 
         with open(fpath, "w+") as f:
             r = requests.get(url, stream=True)
+
             if r.ok:
                 for block in r.iter_content(1024):
                     f.write(block)
