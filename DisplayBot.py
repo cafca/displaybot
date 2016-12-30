@@ -113,7 +113,7 @@ def receive(bot, update):
             logger.debug("Processing attachment")
             file_data = bot.getFile(doc.file_id)
             logger.debug("Downloading {}".format(file_data["file_path"]))
-            download_clip(file_data["file_path"], update, doc["mime_type"],
+            download_clip(file_data["file_path"], bot, update, doc["mime_type"],
                 fname=doc["file_name"])
     except Exception as e:
         logger.error(e, exc_info=True)
@@ -142,6 +142,7 @@ def receive(bot, update):
             if "Content-Type" in link.headers:
                 download_clip(
                     url=url,
+                    bot=bot,
                     update=update,
                     content_type=link.headers["Content-Type"])
             else:
@@ -160,7 +161,7 @@ import datetime
 
 from sh import rm
 
-def download_clip(url, update, content_type, fname=None):
+def download_clip(url, bot, update, content_type, fname=None):
     global appdata
 
     if not fname:
