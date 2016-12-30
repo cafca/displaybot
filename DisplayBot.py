@@ -201,7 +201,7 @@ def download_clip(url, update, content_type, fname=None):
         appdata["incoming"] = clip
         save()
 
-        update.message.reply_text("👾 Added video to database.")
+        bot.sendMessage(chat_id=update.message.chat_id, text="👾 Added video to database.")
         logger.info("Saved new clip {} from {}".format(fname, author))
 
 
@@ -397,7 +397,7 @@ class Radio(Thread):
         # Radio station selector
         msg = "⏹ Radio turned off.\n\nSelect a station to start."
         kb = inline_keyboard({k:k for k in appdata["stations"].keys()})
-        update.message.reply_text(msg,
+        bot.sendMessage(chat_id=update.message.chat_id, text=msg,
             reply_markup=kb)
 
     @classmethod
