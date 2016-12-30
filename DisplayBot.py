@@ -427,6 +427,32 @@ class Radio(Thread):
             bot.sendMessage(q.message.chat_id,
                 text="I don't know about '{}'".format(station))
 
+    @classmethod
+    @log_exceptions
+    def telegram_manual(cls, bot, update, args=list()):
+        global appdata
+
+        rv = ""
+        if len(args) == 1:
+            url = args[0]
+            logger.debug("Manual play requested: {}".format(url))
+            try:
+                requests.head(url)
+            except requests.exceptions.RequestException:
+                logger.error("Requested URL invalid")
+                rv = "Can't play this URL"
+            else:
+                appdata["stations"]["manual"] = url
+                appdata["station_playing"] = "manual"
+                appdata["station_playing_sent"] = None
+                rv = "Switching playback..."
+                save()
+        else:
+            logger.warning("Manual play did not receive URL parameter")
+            rv = "Please send a URL with this command to play it."
+
+        bot.sendMessage(update.message.chat_id, text=rv)
+
 
 class VideoPlayer(Thread):
     def __init__(self):
@@ -506,10 +532,15 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
 
+    # radio
     dp.add_handler(CommandHandler("radio", Radio.telegram_command,
         pass_args=True, pass_job_queue=True))
     dp.add_handler(CallbackQueryHandler(Radio.telegram_change_station,
         pass_job_queue=True))
+
+    # manual player
+    dp.add_handler(CommandHandler("play", Radio.telegram_manual,
+        pass_args=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
