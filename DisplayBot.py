@@ -257,8 +257,25 @@ def load():
     except IOError, ValueError:
         logger.info("Bootstrap config loaded")
         appdata = {
-            "clips": [],
-            "config": {}
+            "clips": []
+            "incoming": null,
+            "station_playing": null,
+            "station_playing_sent": null,
+            "station_title": null,
+            "station_title_sent": null,
+            "stations": {
+                "91.4": "http://138.201.251.233/brf_128",
+                "deutschlandfunk": "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
+                "dradio-kultur": "http://dradio_mp3_dkultur_m.akacast.akamaistream.net/7/530/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dkultur_m",
+                "dronezone": "http://ice1.somafm.com/dronezone-128-aac",
+                "fip": "http://direct.fipradio.fr/live/fip-midfi.mp3",
+                "fip du groove": "http://direct.fipradio.fr/live/fip-webradio3.mp3",
+                "fip du jazz": "http://direct.fipradio.fr/live/fip-webradio2.mp3",
+                "fip du monde": "http://direct.fipradio.fr/live/fip-webradio4.mp3",
+                "fip du reggae": "http://direct.fipradio.fr/live/fip-webradio6.mp3",
+                "fip du rock": "http://direct.fipradio.fr/live/fip-webradio1.mp3",
+                "fip tout nouveau": "http://direct.fipradio.fr/live/fip-webradio5.mp3"
+            }
         }
 
     logger.debug("@LOAD {} clips".format(len(appdata["clips"])))
@@ -278,9 +295,10 @@ def save():
 
 # In[9]:
 
-from sh import mplayer
+from sh import mplayer, ErrorReturnCode_1
 from time import sleep
 from random import choice
+from collections import OrderedDict
 
 # ## Radio player
 from threading import Thread
@@ -330,7 +348,8 @@ class Radio(Thread):
                     self.logger.info("Playing {}".format(self.url))
                     self.player = mplayer(self.url, "-quiet",
                         _bg=True,
-                        _out=self.interact)
+                        _out=self.interact,
+                        _done=self.teardown)
                 current_url = self.url
 
             elif title != self.title:
@@ -357,6 +376,11 @@ class Radio(Thread):
                 if len(title) > 0:
                     global appdata
                     appdata["station_title"] = title
+
+    @classmethod
+    def teardown(cls, cmd, success, exit_code):
+        logger = logging.getLogger("oxo")
+        logger.debug("Radio player {} exits with success {} and exit code {}".format(cmd, success, exit_code))
 
 
     def update(self):
@@ -396,6 +420,7 @@ class Radio(Thread):
             self.logger.debug("Radio did not play")
 
     @classmethod
+    @log_exceptions
     def telegram_command(cls, bot, update, job_queue, args=list()):
         global appdata
 
@@ -405,7 +430,8 @@ class Radio(Thread):
 
         # Radio station selector
         msg = "⏹ Radio turned off.\n\nSelect a station to start."
-        kb = inline_keyboard({k:k for k in appdata["stations"].keys()})
+        kb = inline_keyboard(OrderedDict(
+            sorted({k:k for k in appdata["stations"].keys()}.items())))
         bot.sendMessage(chat_id=update.message.chat_id, text=msg,
             reply_markup=kb)
 
@@ -468,30 +494,37 @@ class VideoPlayer(Thread):
         Thread.__init__(self)
         self.logger = logging.getLogger("oxo")
         self.close_player = False
+        self.stopped = False
 
     @classmethod
     def filepath(self, current_clip):
         return os.path.join(DATA_DIR, "clips", current_clip["filename"])
 
     def run(self):
-        current_clip = VideoPlayer.get_next()
-        self.logger.info("Playing clip {}".format(current_clip["filename"]))
-        self.player = mplayer(self.filepath(current_clip),
-            "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact)
-        self.player.wait()
+        while not self.stopped:
+            current_clip = VideoPlayer.get_next()
+            self.logger.info("Starting video player with clip {}".format(current_clip["filename"]))
+            self.player = mplayer(self.filepath(current_clip),
+                "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact, _done=self.teardown)
+            try:
+                self.player.wait()
+            except ErrorReturnCode_1:
+                self.logger.error("Video player returned code 1.")
+        self.logger.debug("Exit video player")
 
     @property
     def running(self):
-        return self.player is not None and self.player != ''
+        return self.player and self.player is not None and self.player != ''
 
     def stop(self):
         self.logger.debug("Stopping video player")
+        self.stopped = True
         if self.running:
             try:
                 self.player.terminate()
             except OSError as e:
                 self.logger.debug(
-                    "Error stopping video player '{}'\n{}".format(self.player, e), exc_info=True)
+                    "Error stopping video player '{}'\n{}".format(type(self.player), e), exc_info=True)
             self.logger.info("Video player stopped")
         else:
             self.logger.debug("Video player did not play")
@@ -502,10 +535,16 @@ class VideoPlayer(Thread):
 
         logger = logging.getLogger("oxo")
         if START_PLAYBACK in line:
-            path = cls.filepath(cls.get_next())
+            nextclip = cls.get_next()
+            path = cls.filepath(nextclip)
             cmd = "loadfile {} 1\n".format(path)
-            logger.info("Enqueued clip {}".format(path))
+            logger.info("Enqueued clip {}".format(nextclip['filename']))
             stdin.put(cmd)
+
+    @classmethod
+    def teardown(cls, cmd, success, exit_code):
+        logger = logging.getLogger("oxo")
+        logger.debug("Video player {} exits with success {} and exit code {}".format(cmd, success, exit_code))
 
     @classmethod
     def get_next(cls):
