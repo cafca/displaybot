@@ -257,12 +257,12 @@ def load():
     except IOError, ValueError:
         logger.info("Bootstrap config loaded")
         appdata = {
-            "clips": []
-            "incoming": null,
-            "station_playing": null,
-            "station_playing_sent": null,
-            "station_title": null,
-            "station_title_sent": null,
+            "clips": [],
+            "incoming": None,
+            "station_playing": None,
+            "station_playing_sent": None,
+            "station_title": None,
+            "station_title_sent": None,
             "stations": {
                 "91.4": "http://138.201.251.233/brf_128",
                 "deutschlandfunk": "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
