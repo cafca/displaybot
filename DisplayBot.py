@@ -382,7 +382,11 @@ class Radio(Thread):
         self.logger.debug("Stopping radio player...")
         self.stopped = True
         if self.player is not None:
-            self.player.terminate()
+            try:
+                self.player.terminate()
+            except OSError as e:
+                self.logger.debug(
+                    "Error stopping radio player '{}'\n{}".format(self.player, e), exc_info=True)
             self.logger.info("Radio stopped")
         else:
             self.logger.debug("Radio did not play")
