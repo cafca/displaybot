@@ -479,7 +479,7 @@ class VideoPlayer(Thread):
                 self.player.terminate()
             except OSError as e:
                 self.logger.debug(
-                    "Error stopping video player {}".format(e), exc_info=True)
+                    "Error stopping video player '{}'\n{}".format(self.player, e), exc_info=True)
             self.logger.info("Video player stopped")
         else:
             self.logger.debug("Video player did not play")

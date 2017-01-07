@@ -3,4 +3,10 @@
 
 # Start display bot
 
-python DisplayBot.py
+NUM_PROCESSES=$(ps aux | grep python | wc -l);
+
+if [ $NUM_PROCESSES -eq 1 ];
+then
+    export DISPLAY=:0;
+    nohup python ~/displaybot/DisplayBot.py &
+fi
