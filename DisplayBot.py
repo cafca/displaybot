@@ -319,7 +319,7 @@ class Radio(Thread):
             self.update()
             if current_url != self.url:
                 self.logger.debug("Station changed")
-                if self.player is not None:
+                if self.running:
                     self.player.terminate()
                     self.logger.info("Stopped running radio")
                     self.player = None
@@ -338,6 +338,10 @@ class Radio(Thread):
                 self.logger.info("Title is {}".format(title))
 
             sleep(1)
+
+    @property
+    def running(self):
+        return self.player is not None and self.player != ''
 
     @classmethod
     def interact(cls, line, stdin):
@@ -381,7 +385,7 @@ class Radio(Thread):
     def stop(self):
         self.logger.debug("Stopping radio player...")
         self.stopped = True
-        if self.player is not None:
+        if self.running:
             try:
                 self.player.terminate()
             except OSError as e:
@@ -476,9 +480,13 @@ class VideoPlayer(Thread):
             "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact)
         self.player.wait()
 
+    @property
+    def running(self):
+        return self.player is not None and self.player != ''
+
     def stop(self):
         self.logger.debug("Stopping video player")
-        if self.player is not None:
+        if self.running:
             try:
                 self.player.terminate()
             except OSError as e:
