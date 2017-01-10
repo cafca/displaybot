@@ -294,6 +294,7 @@ def save():
 # ## Videoplayer and Radio
 
 # In[9]:
+import wikipedia
 
 from sh import mplayer, ErrorReturnCode_1
 from time import sleep
@@ -304,6 +305,8 @@ from collections import OrderedDict
 from threading import Thread
 from telegram.ext import Job
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+import fip_api
 
 def inline_keyboard(options):
     """Return an inline Keyboard given a dictionary of callback:display pairs."""
@@ -402,6 +405,43 @@ class Radio(Thread):
             appdata["station_title_sent"] = t
             save()
 
+    @classmethod
+    def send_fip_title(cls, bot, job):
+        logger = logging.getLogger("oxo")
+        global appdata
+
+        logger.debug("Requesting fip current track")
+        current = fip_api.current_track()
+        last = appdata["station_title_sent"]
+
+        def titlestr(t):
+            if t:
+                return "{} - {} ({})".format(
+                    t["artist"], t["title"], t["album"])
+            else:
+                return None
+
+        if titlestr(current) != last:
+            wp_articles = wikipedia.search(current["artist"])
+            if len(wp_articles) > 0:
+                summary = "\n\n" + wikipedia.summary(wp_articles[0])
+            else:
+                summary = None
+
+            msg = "▶️ Now playing {title} - {artist}\nfrom {album}{summary}".format(
+                title=current["title"],
+                artist=current["artist"],
+                album=current["album"],
+                summary=summary)
+
+            bot.sendMessage(chat_id=job.context, text=msg)
+            appdata["station_title_sent"] = titlestr(current)
+            save()
+
+            logger.debug("Title changed from '{}' to '{}'".format(
+                last, titlestr(current)))
+
+
     def reset_title(self):
         global appdata
         appdata["station_title"] = None
@@ -423,6 +463,12 @@ class Radio(Thread):
     @log_exceptions
     def telegram_command(cls, bot, update, job_queue, args=list()):
         global appdata
+
+        # Remove the old title data job
+        if len(job_queue.jobs()) > 0:
+            job = job_queue.jobs()[0]
+            logger.debug("Removing {}".format(job))
+            job.schedule_removal()
 
         appdata["station_playing"] = None
         appdata["station_playing_sent"] = None
@@ -448,10 +494,20 @@ class Radio(Thread):
                 text="Tuning to {}...".format(station))
 
             appdata["station_playing"] = station
-            rv = Job(Radio.send_title,
-                1.0, repeat=True, context=q.message.chat_id)
-            job_queue.put(rv)
             save()
+
+            if station.startswith("fip"):
+                logger.info("Starting fip api title crawler...")
+                job_function = Radio.send_fip_title
+                delay = 7.0
+            else:
+                job_function = Radio.send_title
+                delay = 1.0
+            logger.info(str(job_function))
+
+            rv = Job(job_function,
+                delay, repeat=True, context=q.message.chat_id)
+            job_queue.put(rv)
 
             bot.editMessageText(
                 text="📻 Changed station to {}.".format(station),
@@ -604,9 +660,9 @@ def main():
     updater.start_polling()
 
     # Start the player
-    gif_player = VideoPlayer()
-    gif_player.setDaemon(True)
-    gif_player.start()
+    # gif_player = VideoPlayer()
+    # gif_player.setDaemon(True)
+    # gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
@@ -617,8 +673,12 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
-    gif_player.stop()
+    # gif_player.stop()
     radio.stop()
+
+    global appdata
+    appdata["station_playing_sent"] = None
+    save()
 
 
 
