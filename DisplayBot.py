@@ -304,7 +304,7 @@ from collections import OrderedDict
 # ## Radio player
 from threading import Thread
 from telegram.ext import Job
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, ChatAction
 
 import fip_api
 
@@ -422,7 +422,8 @@ class Radio(Thread):
                 return None
 
         if titlestr(current) != last:
-            msg = u"▶️ Now playing {title} - {artist}\nfrom {album}".format(
+            bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
+            msg = u"▶️ Now playing {artist} – _{title}_ \nfrom {album}".format(
                 title=current["title"],
                 artist=current["artist"],
                 album=current["album"])
@@ -435,9 +436,15 @@ class Radio(Thread):
                 logger.debug("Wikipedia: {}".format(wp))
                 wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
                 image_url = wp_images[0] if len(wp_images) > 0 else None
-                msg = u"{}\n\n{}".format(msg, wp.summary)
+                msg = u"{}\n\n*{}*\n{}\n\n[Wikipedia]({})".format(
+                    msg, wp.title, wp.summary, wp.url)
 
-            bot.sendMessage(chat_id=job.context, text=msg, disable_notification=True)
+            bot.sendMessage(chat_id=job.context,
+                text=msg,
+                disable_notification=True,
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN)
+
             if image_url:
                 logger.debug("Sending photo {}".format(image_url))
                 try:
@@ -671,7 +678,7 @@ def main():
     # Start the player
     gif_player = VideoPlayer()
     gif_player.setDaemon(True)
-    gif_player.start()
+    # gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
