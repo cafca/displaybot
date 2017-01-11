@@ -306,8 +306,6 @@ from threading import Thread
 from telegram.ext import Job
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, ChatAction
 
-import fip_api
-
 def inline_keyboard(options):
     """Return an inline Keyboard given a dictionary of callback:display pairs."""
     rv = InlineKeyboardMarkup([[InlineKeyboardButton(v, callback_data=k)]
@@ -352,7 +350,8 @@ class Radio(Thread):
                     self.player = mplayer(self.url, "-quiet",
                         _bg=True,
                         _out=self.interact,
-                        _done=self.teardown)
+                        _done=self.teardown,
+                        _ok_code=[0, 1])
                 current_url = self.url
 
             elif title != self.title:
@@ -401,9 +400,14 @@ class Radio(Thread):
             if t:
                 msg = "▶️ Now playing {}".format(t)
                 bot.sendMessage(chat_id=job.context, text=msg)
+                if t.find(" - "):
+                    cls.send_research(t[:t.find(" - ")], bot, job)
+                else:
+                    logger.debug("Not compiling research for this title")
             logger.debug("Title changed from '{}' to '{}'".format(t0, t))
             appdata["station_title_sent"] = t
             save()
+
 
     @classmethod
     def send_fip_title(cls, bot, job):
@@ -411,8 +415,30 @@ class Radio(Thread):
         global appdata
 
         logger.debug("Requesting fip current track")
-        current = fip_api.current_track()
         last = appdata["station_title_sent"]
+
+        fip_station = 7
+        url = "http://www.fipradio.fr/livemeta/{}".format(fip_station)
+        req = requests.get(url)
+        data = req.json()
+
+        if "levels" not in data or len(data["levels"]) == 0:
+            logger.warning("No data found in fip livemeta:\n\n{}".format(data))
+            return None
+
+        position = data["levels"][0]["position"]
+        currentItemId = data["levels"][0]['items'][position]
+        currentItem = data["steps"][currentItemId]
+
+        current = {
+            "artist": currentItem.get("authors").title(),
+            "performer": currentItem.get("performers").title(),
+            "title": currentItem.get("title").title(),
+            "album": currentItem.get("titreAlbum").title(),
+            "label": currentItem.get("label").title(),
+            "image": currentItem.get("visual")
+        }
+
 
         def titlestr(t):
             if t:
@@ -422,41 +448,58 @@ class Radio(Thread):
                 return None
 
         if titlestr(current) != last:
-            bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
             msg = u"▶️ Now playing {artist} – _{title}_ \nfrom {album}".format(
                 title=current["title"],
                 artist=current["artist"],
                 album=current["album"])
 
-            image_url = None
-            wp_articles = wikipedia.search(current["artist"])
-            logger.debug("WP Articles: {}".format(wp_articles))
-            if len(wp_articles) > 0:
-                wp = wikipedia.page(wp_articles[0])
-                logger.debug("Wikipedia: {}".format(wp))
-                wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
-                image_url = wp_images[0] if len(wp_images) > 0 else None
-                msg = u"{}\n\n*{}*\n{}\n\n[Wikipedia]({})".format(
-                    msg, wp.title, wp.summary, wp.url)
-
             bot.sendMessage(chat_id=job.context,
                 text=msg,
                 disable_notification=True,
-                disable_web_page_preview=True,
                 parse_mode=ParseMode.MARKDOWN)
-
-            if image_url:
-                logger.debug("Sending photo {}".format(image_url))
-                try:
-                    bot.sendPhoto(chat_id=job.context, photo=image_url)
-                except Exception as e:
-                    logger.error(e)
 
             appdata["station_title_sent"] = titlestr(current)
             save()
 
             logger.debug("Title changed from '{}' to '{}'".format(
                 last, titlestr(current)))
+
+            cls.send_research(
+                current["artist"], bot, job, image_url=current["image"])
+
+    @classmethod
+    def send_research(cls, subject, bot, job, image_url=None):
+            logger = logging.getLogger("oxo")
+            logger.info("Researching '{}'".format(subject))
+            bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
+
+            wp_articles = wikipedia.search(subject)
+            logger.debug("WP Articles: {}".format(wp_articles))
+            if len(wp_articles) > 0:
+                wp = wikipedia.page(wp_articles[0])
+                logger.debug("Wikipedia: {}".format(wp))
+                msg = u"*{}*\n{}\n\n[Wikipedia]({})".format(
+                    wp.title, wp.summary, wp.url)
+
+                bot.sendMessage(chat_id=job.context,
+                    text=msg,
+                    disable_notification=True,
+                    disable_web_page_preview=True,
+                    parse_mode=ParseMode.MARKDOWN)
+
+                if image_url is None:
+                    wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
+                    image_url = wp_images[0] if len(wp_images) > 0 else None
+
+                if image_url:
+                    logger.debug("Sending photo {}".format(image_url))
+                    try:
+                        bot.sendPhoto(chat_id=job.context, photo=image_url)
+                    except Exception as e:
+                        logger.error(e)
+            else:
+                logger.debug("No wikipedia articles found.")
+
 
 
     def reset_title(self):
@@ -577,7 +620,12 @@ class VideoPlayer(Thread):
             current_clip = VideoPlayer.get_next()
             self.logger.info("Starting video player with clip {}".format(current_clip["filename"]))
             self.player = mplayer(self.filepath(current_clip),
-                "-slave", "-fs", "-vo", "sdl", _bg=True, _out=self.interact, _done=self.teardown)
+                "-slave",
+                "-fs",
+                "-vo", "sdl",
+                _bg=True,
+                _out=self.interact,
+                _done=self.teardown)
             try:
                 self.player.wait()
             except ErrorReturnCode_1:
@@ -689,7 +737,7 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
-    gif_player.stop()
+    # gif_player.stop()
     radio.stop()
 
     global appdata
