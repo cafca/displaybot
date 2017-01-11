@@ -485,7 +485,16 @@ class Radio(Thread):
             wp_articles = wikipedia.search(subject)
             logger.debug("WP Articles: {}".format(wp_articles))
             if len(wp_articles) > 0:
-                wp = wikipedia.page(wp_articles[0])
+                for i in xrange(len(wp_articles)):
+                    try:
+                        wp = wikipedia.page(wp_articles[0])
+                        break
+                    except wikipedia.DisambiguationError:
+                        logger.warning("Wikipedia: DisambiguationError for {}".format(wp_articles[0]))
+                else:
+                    logger.warning("Wikipedia articles exhausted")
+                    return
+
                 logger.debug("Wikipedia: {}".format(wp))
                 msg = u"*{}*\n{}\n\n[Wikipedia]({})".format(
                     wp.title, wp.summary, wp.url)
@@ -735,7 +744,7 @@ def main():
     # Start the player
     gif_player = VideoPlayer()
     gif_player.setDaemon(True)
-    gif_player.start()
+    # gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
@@ -746,7 +755,7 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
-    gif_player.stop()
+    # gif_player.stop()
     radio.stop()
 
     global appdata
