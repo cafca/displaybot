@@ -441,11 +441,11 @@ class Radio(Thread):
         currentItem = data["steps"][currentItemId]
 
         current = {
-            "artist": currentItem["authors"].title() if "authors" if currentItem else None,
-            "performer": currentItem["performers"].title() if "performers" if currentItem else None,
-            "title": currentItem["title"].title() if "title" if currentItem else None,
-            "album": currentItem["titreAlbum"].title() if "titreAlbum" if currentItem else None,
-            "label": currentItem["label"].title() if "label" if currentItem else None,
+            "artist": currentItem["authors"].title() if "authors" in currentItem else None,
+            "performer": currentItem["performers"].title() if "performers" in currentItem else None,
+            "title": currentItem["title"].title() if "title" in currentItem else None,
+            "album": currentItem["titreAlbum"].title() if "titreAlbum" in currentItem else None,
+            "label": currentItem["label"].title() if "label" in currentItem else None,
             "image": currentItem.get("visual")
         }
 
