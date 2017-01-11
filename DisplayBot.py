@@ -422,19 +422,29 @@ class Radio(Thread):
                 return None
 
         if titlestr(current) != last:
-            wp_articles = wikipedia.search(current["artist"])
-            if len(wp_articles) > 0:
-                summary = "\n\n" + wikipedia.summary(wp_articles[0])
-            else:
-                summary = None
-
-            msg = "▶️ Now playing {title} - {artist}\nfrom {album}{summary}".format(
+            msg = u"▶️ Now playing {title} - {artist}\nfrom {album}".format(
                 title=current["title"],
                 artist=current["artist"],
-                album=current["album"],
-                summary=summary)
+                album=current["album"])
 
-            bot.sendMessage(chat_id=job.context, text=msg)
+            image_url = None
+            wp_articles = wikipedia.search(current["artist"])
+            logger.debug("WP Articles: {}".format(wp_articles))
+            if len(wp_articles) > 0:
+                wp = wikipedia.page(wp_articles[0])
+                logger.debug("Wikipedia: {}".format(wp))
+                wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
+                image_url = wp_images[0] if len(wp_images) > 0 else None
+                msg = u"{}\n\n{}".format(msg, wp.summary)
+
+            bot.sendMessage(chat_id=job.context, text=msg, disable_notification=True)
+            if image_url:
+                logger.debug("Sending photo {}".format(image_url))
+                try:
+                    bot.sendPhoto(chat_id=job.context, photo=image_url)
+                except Exception as e:
+                    logger.error(e)
+
             appdata["station_title_sent"] = titlestr(current)
             save()
 
@@ -660,9 +670,9 @@ def main():
     updater.start_polling()
 
     # Start the player
-    # gif_player = VideoPlayer()
-    # gif_player.setDaemon(True)
-    # gif_player.start()
+    gif_player = VideoPlayer()
+    gif_player.setDaemon(True)
+    gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
@@ -673,7 +683,7 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
-    # gif_player.stop()
+    gif_player.stop()
     radio.stop()
 
     global appdata
