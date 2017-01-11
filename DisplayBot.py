@@ -506,14 +506,13 @@ class Radio(Thread):
             appdata["station_playing"] = station
             save()
 
-            if station.startswith("fip"):
+            if station == "fip":
                 logger.info("Starting fip api title crawler...")
                 job_function = Radio.send_fip_title
                 delay = 7.0
             else:
                 job_function = Radio.send_title
                 delay = 1.0
-            logger.info(str(job_function))
 
             rv = Job(job_function,
                 delay, repeat=True, context=q.message.chat_id)
