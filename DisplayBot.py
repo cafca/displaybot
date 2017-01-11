@@ -417,7 +417,17 @@ class Radio(Thread):
         logger.debug("Requesting fip current track")
         last = appdata["station_title_sent"]
 
-        fip_station = 7
+        fip_stations = {
+            "fip": 7,
+            "fip du groove": 66,
+            "fip du jazz": 65,
+            "fip du monde": 69,
+            "fip du reggae": 71,
+            "fip du rock": 64,
+            "fip tout nouveau": 70
+        }
+
+        fip_station = fip_stations.get(appdata["station_playing"])
         url = "http://www.fipradio.fr/livemeta/{}".format(fip_station)
         req = requests.get(url)
         data = req.json()
@@ -438,7 +448,6 @@ class Radio(Thread):
             "label": currentItem.get("label").title(),
             "image": currentItem.get("visual")
         }
-
 
         def titlestr(t):
             if t:
@@ -556,7 +565,7 @@ class Radio(Thread):
             appdata["station_playing"] = station
             save()
 
-            if station == "fip":
+            if station.startswith("fip"):
                 logger.info("Starting fip api title crawler...")
                 job_function = Radio.send_fip_title
                 delay = 7.0
