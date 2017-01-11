@@ -735,7 +735,7 @@ def main():
     # Start the player
     gif_player = VideoPlayer()
     gif_player.setDaemon(True)
-    # gif_player.start()
+    gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
@@ -746,7 +746,7 @@ def main():
     # start_polling() is non-blocking and will stop the bot gracefully.
     updater.idle()
 
-    # gif_player.stop()
+    gif_player.stop()
     radio.stop()
 
     global appdata
