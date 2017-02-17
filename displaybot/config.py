@@ -6,8 +6,14 @@ import logging
 import os
 import json
 
-# Use appdata to store all persistent application state
-appdata = dict()
+from tinydb import TinyDB, Query
+
+# Setup db
+
+DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
+
+config_fname = os.path.join(DATA_DIR, "database.json")
+db = TinyDB(config_fname)
 
 DEFAULT_CONFIG = {
     "clips": [],
@@ -30,8 +36,6 @@ DEFAULT_CONFIG = {
         "fip tout nouveau": "http://direct.fipradio.fr/live/fip-webradio5.mp3"
     }
 }
-
-DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
 
 logger = logging.getLogger("oxo")
 logger.setLevel(logging.DEBUG)
@@ -80,14 +84,6 @@ SUPPORTED_TYPES = ["video/mp4", "video/webm", "image/gif"]
 SERVER_URL = "http://localhost:3000"
 
 playnext = None
-
-# ## Config persistence
-#
-# We use a dictionary to store all application data and serialize it in a JSON file.
-
-# In[7]:
-
-config_fname = os.path.join(DATA_DIR, "data.json")
 
 
 def load():
