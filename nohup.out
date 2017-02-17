@@ -1,0 +1,104 @@
+/usr/local/Cellar/python/2.7.12_2/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python: can't open file '/Users/vaul/displaybot/displaybot/displaybot.py': [Errno 2] No such file or directory
+02/17 15:35:12: Logging to /Users/vaul/.displayBot/hello.log
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 42, in main
+    gif_player = Video()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/video.py", line 19, in __init__
+    Player.__init__(self)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 34, in __init__
+    Thread.__init__(self)
+TypeError: unbound method __init__() must be called with Thread instance as first argument (got Video instance instead)
+02/17 15:35:13: global name 'appdata' is not defined
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 23, in wrapper
+    func(*args, **kwargs)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/radio.py", line 240, in telegram_command
+    appdata["station_playing"] = None
+NameError: global name 'appdata' is not defined
+02/17 15:42:25: Logging to /Users/vaul/.displayBot/hello.log
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 42, in main
+    gif_player = Video()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/video.py", line 19, in __init__
+    Player.__init__(self)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 34, in __init__
+    Thread.__init__(self)
+TypeError: unbound method __init__() must be called with Thread instance as first argument (got Video instance instead)
+02/17 15:46:07: Logging to /Users/vaul/.displayBot/hello.log
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 43, in main
+    gif_player.setDaemon(True)
+AttributeError: 'Video' object has no attribute 'setDaemon'
+02/17 15:46:51: Logging to /Users/vaul/.displayBot/hello.log
+02/17 15:47:06: Requesting station fip (inline)
+02/17 15:47:06: Starting fip api title crawler...
+02/17 15:47:06: Playing http://direct.fipradio.fr/live/fip-midfi.mp3
+02/17 15:47:06: global name 'mplayer' is not defined
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 23, in wrapper
+    func(*args, **kwargs)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/radio.py", line 49, in run
+    self.player = mplayer(self.url, "-quiet",
+NameError: global name 'mplayer' is not defined
+02/17 15:47:13: An uncaught error was raised while executing job send_fip_title
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/site-packages/telegram/ext/jobqueue.py", line 148, in tick
+    job.run(self.bot)
+  File "/usr/local/lib/python2.7/site-packages/telegram/ext/jobqueue.py", line 265, in run
+    self.callback(bot, self)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/radio.py", line 140, in send_fip_title
+    req = requests.get(url)
+NameError: global name 'requests' is not defined
+02/17 15:47:20: An uncaught error was raised while executing job send_fip_title
+Traceback (most recent call last):
+  File "/usr/local/lib/python2.7/site-packages/telegram/ext/jobqueue.py", line 148, in tick
+    job.run(self.bot)
+  File "/usr/local/lib/python2.7/site-packages/telegram/ext/jobqueue.py", line 265, in run
+    self.callback(bot, self)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/radio.py", line 140, in send_fip_title
+    req = requests.get(url)
+NameError: global name 'requests' is not defined
+<super: <class 'Video'>, <Video object>>
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 56, in main
+    radio.stop()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 50, in stop
+    self.logger.debug("Stopping {} player...".format(self.__classname__))
+AttributeError: 'Radio' object has no attribute '__classname__'
+02/17 15:48:32: Logging to /Users/vaul/.displayBot/hello.log
+<super: <class 'Video'>, <Video object>>
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 56, in main
+    radio.stop()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 50, in stop
+    self.logger.debug("Stopping {} player...".format(self.__classname__))
+AttributeError: 'Radio' object has no attribute '__classname__'
+02/17 15:51:17: Logging to /Users/vaul/.displayBot/hello.log
+02/17 15:51:25: Requesting station fip (inline)
+02/17 15:51:25: Starting fip api title crawler...
+02/17 15:51:26: Playing http://direct.fipradio.fr/live/fip-midfi.mp3
+02/17 15:51:26: 'Radio' object has no attribute 'teardown'
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/__init__.py", line 23, in wrapper
+    func(*args, **kwargs)
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/player/radio.py", line 54, in run
+    _done=self.teardown,
+AttributeError: 'Radio' object has no attribute 'teardown'
+02/17 15:51:32: Researching 'Son Of Dave'
+<super: <class 'Video'>, <Video object>>
+Traceback (most recent call last):
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 63, in <module>
+    main()
+  File "/Users/vaul/Projects/displaybot/venv/displaybot/displaybot/displaybot.py", line 59, in main
+    appdata["station_playing_sent"] = None
+NameError: global name 'appdata' is not defined

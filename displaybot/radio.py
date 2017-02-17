@@ -1,12 +1,35 @@
-class Radio(Thread):
+# coding: utf-8
+
+"""Radio player."""
+
+import wikipedia
+import logging
+import requests
+
+from time import sleep
+from collections import OrderedDict
+from telegram.ext import Job
+from sh import mplayer
+
+from telegram import ParseMode, ChatAction
+from config import load, save
+from player import Player, log_exceptions, inline_keyboard
+
+global appdata
+appdata = load()
+
+
+class Radio(Player):
+    """Radio class."""
+
     def __init__(self):
-        Thread.__init__(self)
+        """Init as Player."""
+        super(Radio, self).__init__()
         self.url = None
-        self.player = None
-        self.logger = logging.getLogger("oxo")
 
     @log_exceptions
     def run(self):
+        """Thread target."""
         self.stopped = False
         current_url = None
         title = None
@@ -38,12 +61,27 @@ class Radio(Thread):
 
             sleep(1)
 
-    @property
-    def running(self):
-        return self.player is not None and self.player != ''
+    #
+    # Player state
+    #
+
+    def update(self):
+        """Update player from global appdata."""
+        global appdata
+        self.url = appdata["stations"].get(appdata["station_playing"])
+        self.title = appdata.get("station_title")
+
+    def reset_title(self):
+        """Set title to None."""
+        global appdata
+        appdata["station_title"] = None
 
     @classmethod
     def interact(cls, line, stdin):
+        """Handle text output of mplayer, line by line.
+
+        The data contains ICY data / track metadata.
+        """
         logger = logging.getLogger("oxo")
         if line.startswith("ICY"):
             logger.debug("Found ICY data: {}".format(line))
@@ -57,19 +95,13 @@ class Radio(Thread):
                     global appdata
                     appdata["station_title"] = title
 
-    @classmethod
-    def teardown(cls, cmd, success, exit_code):
-        logger = logging.getLogger("oxo")
-        logger.debug("Radio player {} exits with success {} and exit code {}".format(cmd, success, exit_code))
-
-
-    def update(self):
-        global appdata
-        self.url = appdata["stations"].get(appdata["station_playing"])
-        self.title = appdata.get("station_title")
+    #
+    # Telegram interaction
+    #
 
     @classmethod
     def send_title(cls, bot, job):
+        """Send current title to chat."""
         logger = logging.getLogger("oxo")
         global appdata
         t = appdata["station_title"]
@@ -86,9 +118,9 @@ class Radio(Thread):
             appdata["station_title_sent"] = t
             save()
 
-
     @classmethod
     def send_fip_title(cls, bot, job):
+        """Send info about currently playing song on fip through the fip web api."""
         logger = logging.getLogger("oxo")
         global appdata
 
@@ -114,17 +146,18 @@ class Radio(Thread):
             logger.warning("No data found in fip livemeta:\n\n{}".format(data))
             return None
 
+        # fip, y u no flat data
         position = data["levels"][0]["position"]
-        currentItemId = data["levels"][0]['items'][position]
-        currentItem = data["steps"][currentItemId]
+        item_id = data["levels"][0]['items'][position]
+        item = data["steps"][item_id]
 
         current = {
-            "artist": currentItem["authors"].title() if "authors" in currentItem else None,
-            "performer": currentItem["performers"].title() if "performers" in currentItem else None,
-            "title": currentItem["title"].title() if "title" in currentItem else None,
-            "album": currentItem["titreAlbum"].title() if "titreAlbum" in currentItem else None,
-            "label": currentItem["label"].title() if "label" in currentItem else None,
-            "image": currentItem.get("visual")
+            "artist": item["authors"].title() if "authors" in item else None,
+            "performer": item["performers"].title() if "performers" in item else None,
+            "title": item["title"].title() if "title" in item else None,
+            "album": item["titreAlbum"].title() if "titreAlbum" in item else None,
+            "label": item["label"].title() if "label" in item else None,
+            "image": item.get("visual")
         }
 
         def titlestr(t):
@@ -156,68 +189,51 @@ class Radio(Thread):
 
     @classmethod
     def send_research(cls, subject, bot, job, image_url=None):
-            logger = logging.getLogger("oxo")
-            logger.info("Researching '{}'".format(subject))
-            bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
+        """Send wikipedia summary and image or supplied image to chat."""
+        logger = logging.getLogger("oxo")
+        logger.info("Researching '{}'".format(subject))
+        bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
 
-            wp_articles = wikipedia.search(subject)
-            logger.debug("WP Articles: {}".format(wp_articles))
-            if len(wp_articles) > 0:
-                for i in xrange(len(wp_articles)):
-                    try:
-                        wp = wikipedia.page(wp_articles[0])
-                        break
-                    except wikipedia.DisambiguationError:
-                        logger.warning("Wikipedia: DisambiguationError for {}".format(wp_articles[0]))
-                else:
-                    logger.warning("Wikipedia articles exhausted")
-                    return
-
-                logger.debug("Wikipedia: {}".format(wp))
-                msg = u"*{}*\n{}\n\n[Wikipedia]({})".format(
-                    wp.title, wp.summary, wp.url)
-
-                bot.sendMessage(chat_id=job.context,
-                    text=msg,
-                    disable_notification=True,
-                    disable_web_page_preview=True,
-                    parse_mode=ParseMode.MARKDOWN)
-
-                if image_url is None:
-                    wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
-                    image_url = wp_images[0] if len(wp_images) > 0 else None
-
-                if image_url:
-                    logger.debug("Sending photo {}".format(image_url))
-                    try:
-                        bot.sendPhoto(chat_id=job.context, photo=image_url)
-                    except Exception as e:
-                        logger.error(e)
+        wp_articles = wikipedia.search(subject)
+        logger.debug("WP Articles: {}".format(wp_articles))
+        if len(wp_articles) > 0:
+            for i in xrange(len(wp_articles)):
+                try:
+                    wp = wikipedia.page(wp_articles[0])
+                    break
+                except wikipedia.DisambiguationError:
+                    logger.warning("Wikipedia: DisambiguationError for {}".format(wp_articles[0]))
             else:
-                logger.debug("No wikipedia articles found.")
+                logger.warning("Wikipedia articles exhausted")
+                return
 
+            logger.debug("Wikipedia: {}".format(wp))
+            msg = u"*{}*\n{}\n\n[Wikipedia]({})".format(
+                wp.title, wp.summary, wp.url)
 
+            bot.sendMessage(chat_id=job.context,
+                text=msg,
+                disable_notification=True,
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN)
 
-    def reset_title(self):
-        global appdata
-        appdata["station_title"] = None
+            if image_url is None:
+                wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
+                image_url = wp_images[0] if len(wp_images) > 0 else None
 
-    def stop(self):
-        self.logger.debug("Stopping radio player...")
-        self.stopped = True
-        if self.running:
-            try:
-                self.player.terminate()
-            except OSError as e:
-                self.logger.debug(
-                    "Error stopping radio player '{}'\n{}".format(self.player, e), exc_info=True)
-            self.logger.info("Radio stopped")
+            if image_url:
+                logger.debug("Sending photo {}".format(image_url))
+                try:
+                    bot.sendPhoto(chat_id=job.context, photo=image_url)
+                except Exception as e:
+                    logger.error(e)
         else:
-            self.logger.debug("Radio did not play")
+            logger.debug("No wikipedia articles found.")
 
     @classmethod
     @log_exceptions
     def telegram_command(cls, bot, update, job_queue, args=list()):
+        """Handle telegram /radio command."""
         global appdata
 
         # Remove the old title data job
@@ -233,17 +249,18 @@ class Radio(Thread):
         # Radio station selector
         msg = "⏹ Radio turned off.\n\nSelect a station to start."
         kb = inline_keyboard(OrderedDict(
-            sorted({k:k for k in appdata["stations"].keys()}.items())))
+            sorted({k: k for k in appdata["stations"].keys()}.items())))
         bot.sendMessage(chat_id=update.message.chat_id, text=msg,
             reply_markup=kb)
 
     @classmethod
     @log_exceptions
     def telegram_change_station(cls, bot, update, job_queue):
-        # Answer callback from radio station selector
+        """Answer callback from radio station selector."""
         global appdata
         q = update.callback_query
         station = q.data
+        logger = logging.getLogger('oxo')
         if station in appdata["stations"]:
             logger.info("Requesting station {} (inline)".format(station))
             bot.answerCallbackQuery(q.id,
@@ -272,29 +289,3 @@ class Radio(Thread):
             bot.answerCallbackQuery(q.id)
             bot.sendMessage(q.message.chat_id,
                 text="I don't know about '{}'".format(station))
-
-    @classmethod
-    @log_exceptions
-    def telegram_manual(cls, bot, update, args=list()):
-        global appdata
-
-        rv = ""
-        if len(args) == 1:
-            url = args[0]
-            logger.debug("Manual play requested: {}".format(url))
-            try:
-                requests.head(url)
-            except requests.exceptions.RequestException:
-                logger.error("Requested URL invalid")
-                rv = "Can't play this URL"
-            else:
-                appdata["stations"]["manual"] = url
-                appdata["station_playing"] = "manual"
-                appdata["station_playing_sent"] = None
-                rv = "Switching playback..."
-                save()
-        else:
-            logger.warning("Manual play did not receive URL parameter")
-            rv = "Please send a URL with this command to play it."
-
-        bot.sendMessage(update.message.chat_id, text=rv)

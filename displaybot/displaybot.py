@@ -3,11 +3,13 @@
 
 """The Displaybot should show a window on a small wall-mounted display that plays gifs and videos from a telegram group or tunes to a web radio station."""
 
-from config import save
+from config import save, load, TELEGRAM_API_TOKEN
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler
-
+from bot import start, receive, error
 from player.radio import Radio
 from player.video import Video
+
+
 
 
 def main():
@@ -28,10 +30,6 @@ def main():
         pass_args=True, pass_job_queue=True))
     dp.add_handler(CallbackQueryHandler(Radio.telegram_change_station,
         pass_job_queue=True))
-
-    # manual player
-    dp.add_handler(CommandHandler("play", Radio.telegram_manual,
-        pass_args=True))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(None, receive))
@@ -59,7 +57,7 @@ def main():
     # gif_player.stop()
     radio.stop()
 
-    global appdata
+    appdata = load()
     appdata["station_playing_sent"] = None
     save()
 

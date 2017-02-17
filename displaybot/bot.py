@@ -1,15 +1,19 @@
 # coding: utf-8
 
 """Configuration."""
+import logging
+import requests
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler
+from conversion import download_clip
 
+logger = logging.getLogger('oxo')
 
 # ## Basic commands for a bot
 #
 # Define a few command handlers for Telegram. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 #
+
 
 def start(bot, update):
     """The start command is sent when the bot is started."""
@@ -21,17 +25,15 @@ def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
-# ## Receive clips from Telegram
-#
-# Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display.
-#
-# There are special cases:
-# - if `url` ends in `gifv`, that is rewritten to `mp4`
-# - if `url` ends in `gif`, the gif is downloaded and converted to a local `mp4` (see code for that below)
-
-
 def receive(bot, update):
-    # Add attachments
+    """Receive clips from Telegram.
+
+    Next ist the receiver for our app. It will look at incoming messages and determine, whether they contain a link and then wether that link points at an mp4 video. This will then be added to the database for display.
+
+    There are special cases:
+    - if `url` ends in `gifv`, that is rewritten to `mp4`
+    - if `url` ends in `gif`, the gif is downloaded and converted to a local `mp4` (see code for that below)
+    """
     doc = update.message.document
     try:
         if doc:
@@ -42,7 +44,6 @@ def receive(bot, update):
                 fname=doc["file_name"])
     except Exception as e:
         logger.error(e, exc_info=True)
-
 
     # Add all URLs in the message
     elems = update.message.parse_entities(types=["url"])

@@ -1,18 +1,18 @@
-# ## Download and file clips
-#
-# Then write a handler to store received videos in the database and computes a cached JSON response on disk with all current videos
+# coding: utf-8
 
-# In[5]:
+"""Download and file clips."""
 
+import logging
 import os
-import tempfile
 import datetime
+import ffmpy
+from config import save
 
-from sh import rm
+logger = logging.getLogger('oxo')
+
 
 def download_clip(url, bot, update, content_type, fname=None):
-    global appdata
-
+    """Download clip and save to appdata."""
     if not fname:
         fname = url.split("/")[-1]
 
@@ -47,6 +47,8 @@ def download_clip(url, bot, update, content_type, fname=None):
             "filename": fname,
             "created": datetime.datetime.now().isoformat()
         }
+
+        global appdata
         appdata["clips"].append(clip)
         appdata["incoming"] = clip
         save()
@@ -56,22 +58,17 @@ def download_clip(url, bot, update, content_type, fname=None):
 
 
 def duplicate(filename):
+    """Boolean, true if given filenam exists in clips."""
     return len([c for c in appdata["clips"]
         if "filename" in c and c["filename"] == filename]) > 0
 
-
-
-# ## Converting gifs
 #
-# In order to convert gifs to the less ressource intensive mp4 format, we can use the ffmpy library, which calls ffmpeg for us outside of python, to make the conversion.
+# Converting gifs
 #
-# This function creates a temporary file and writes the gif to it. Then ffmpeg is called with settings for converting a gif to an mp4 and the result is stored in `frontend/public/videos/`, where the frontend script will be able to access it.
 
-# In[6]:
-
-import ffmpy
 
 def convert_gif(fpath):
+    """Convert gif at fpath using ffmpeg."""
     logger.info("Converting gif to mp4...")
 
     new_fpath = fpath + ".mp4"
