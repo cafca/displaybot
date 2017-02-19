@@ -15,27 +15,19 @@ DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
 config_fname = os.path.join(DATA_DIR, "database.json")
 db = TinyDB(config_fname)
 
-DEFAULT_CONFIG = {
-    "clips": [],
-    "incoming": None,
-    "station_playing": None,
-    "station_playing_sent": None,
-    "station_title": None,
-    "station_title_sent": None,
-    "stations": {
-        "91.4": "http://138.201.251.233/brf_128",
-        "deutschlandfunk": "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
-        "dradio-kultur": "http://dradio_mp3_dkultur_m.akacast.akamaistream.net/7/530/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dkultur_m",
-        "dronezone": "http://ice1.somafm.com/dronezone-128-aac",
-        "fip": "http://direct.fipradio.fr/live/fip-midfi.mp3",
-        "fip du groove": "http://direct.fipradio.fr/live/fip-webradio3.mp3",
-        "fip du jazz": "http://direct.fipradio.fr/live/fip-webradio2.mp3",
-        "fip du monde": "http://direct.fipradio.fr/live/fip-webradio4.mp3",
-        "fip du reggae": "http://direct.fipradio.fr/live/fip-webradio6.mp3",
-        "fip du rock": "http://direct.fipradio.fr/live/fip-webradio1.mp3",
-        "fip tout nouveau": "http://direct.fipradio.fr/live/fip-webradio5.mp3"
-    }
-}
+TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
+with open(os.path.join(DATA_DIR, "TELEGRAM_API_TOKEN")) as f:
+    TELEGRAM_API_TOKEN = f.read().strip()
+
+# As anyone will be able to add the bot and add pictures to your display,
+# you can filter telegram usernames here
+ALLOWED_USERS = []
+
+SUPPORTED_TYPES = ["video/mp4", "video/webm", "image/gif"]
+
+SERVER_URL = "http://localhost:3000"
+
+playnext = None
 
 logger = logging.getLogger("oxo")
 logger.setLevel(logging.DEBUG)
@@ -71,40 +63,53 @@ jqlogger.addHandler(console_handler)
 logger.info("Logging to {}".format(log_dir))
 
 
-TELEGRAM_API_TOKEN = "YOUR TOKEN HERE"
-with open(os.path.join(DATA_DIR, "TELEGRAM_API_TOKEN")) as f:
-    TELEGRAM_API_TOKEN = f.read().strip()
+def setup():
+    Config = Query()
+    if(len(db.search(Config.type == "radio")) == 0):
+        logger.info("Seting up initial configuration\nFile: {}".format(config_fname))
+        db.remove(eids=[e.eid for e in db.all()])
 
-# As anyone will be able to add the bot and add pictures to your display,
-# you can filter telegram usernames here
-ALLOWED_USERS = []
+        try:
+            with open(os.path.join(DATA_DIR, "data.json")) as f:
+                data = json.load(f)
+                for clip in data["clips"]:
+                    clip["type"] = "clip"
+                    logger.info("Adding old clip {}".format(clip))
+                    db.insert(clip)
+                logger.warning("Please delete data.json")
+        except Exception:
+            pass
 
-SUPPORTED_TYPES = ["video/mp4", "video/webm", "image/gif"]
+        radio = {
+            "type": "radio",
+            "station_playing": None,
+            "station_playing_sent": None,
+            "station_title": None,
+            "station_title_sent": None,
+        }
+        db.insert(radio)
 
-SERVER_URL = "http://localhost:3000"
+        stations = {
+            "91.4": "http://138.201.251.233/brf_128",
+            "deutschlandfunk": "http://dradio_mp3_dlf_m.akacast.akamaistream.net/7/249/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dlf_m",
+            "dradio-kultur": "http://dradio_mp3_dkultur_m.akacast.akamaistream.net/7/530/142684/v1/gnl.akacast.akamaistream.net/dradio_mp3_dkultur_m",
+            "dronezone": "http://ice1.somafm.com/dronezone-128-aac",
+            "fip": "http://direct.fipradio.fr/live/fip-midfi.mp3",
+            "fip du groove": "http://direct.fipradio.fr/live/fip-webradio3.mp3",
+            "fip du jazz": "http://direct.fipradio.fr/live/fip-webradio2.mp3",
+            "fip du monde": "http://direct.fipradio.fr/live/fip-webradio4.mp3",
+            "fip du reggae": "http://direct.fipradio.fr/live/fip-webradio6.mp3",
+            "fip du rock": "http://direct.fipradio.fr/live/fip-webradio1.mp3",
+            "fip tout nouveau": "http://direct.fipradio.fr/live/fip-webradio5.mp3"
+        }
 
-playnext = None
+        db.insert_multiple([{"type": "station", "name": name, "url": url}
+            for name, url in stations.items()])
 
-
-def load():
-    """Load appdata from disk."""
-    global appdata
-
-    try:
-        with open(config_fname) as f:
-            appdata = json.load(f)
-    except IOError, ValueError:
-        logger.info("Bootstrap config loaded")
-        appdata = DEFAULT_CONFIG
-
-    logger.debug("@LOAD {} clips".format(len(appdata["clips"])))
-    return appdata
-
-
-def save():
-    """Save appdata to disk."""
-    global appdata
-
-    logger.debug("@SAVE {} clips".format(len(appdata["clips"])))
-    with open(config_fname, "w") as f:
-        json.dump(appdata, f, indent=2, sort_keys=True)
+        db.insert({"type": "incoming", "clip": {}})
+    else:
+        q = Query()
+        logger.info("Database loaded with {} clips and {} stations.".format(
+            db.count(q.type == "clip"),
+            db.count(q.type == "station")
+        ))

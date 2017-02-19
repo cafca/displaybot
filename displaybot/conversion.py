@@ -6,13 +6,16 @@ import logging
 import os
 import datetime
 import ffmpy
-from config import save
+import requests
+
+from tinydb import Query
+from config import db, SUPPORTED_TYPES, DATA_DIR
 
 logger = logging.getLogger('oxo')
 
 
 def download_clip(url, bot, update, content_type, fname=None):
-    """Download clip and save to appdata."""
+    """Download clips."""
     if not fname:
         fname = url.split("/")[-1]
 
@@ -42,25 +45,23 @@ def download_clip(url, bot, update, content_type, fname=None):
             fname = os.path.basename(fpath)
 
         clip = {
+            "type": "clip",
             "url": url,
             "author": author,
             "filename": fname,
-            "created": datetime.datetime.now().isoformat()
+            "created": datetime.datetime.now().isoformat(),
+            "incoming": True
         }
 
-        global appdata
-        appdata["clips"].append(clip)
-        appdata["incoming"] = clip
-        save()
-
+        db.insert(clip)
         bot.sendMessage(chat_id=update.message.chat_id, text="👾 Added video to database.")
         logger.info("Saved new clip {} from {}".format(fname, author))
 
 
 def duplicate(filename):
     """Boolean, true if given filenam exists in clips."""
-    return len([c for c in appdata["clips"]
-        if "filename" in c and c["filename"] == filename]) > 0
+    Duplicate = Query()
+    return len(db.search(Duplicate.filename == filename)) > 0
 
 #
 # Converting gifs

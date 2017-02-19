@@ -3,10 +3,15 @@
 """Video player."""
 
 import logging
+import os
+
 from sh import mplayer, ErrorReturnCode_1
 from random import choice
-from config import save
+from config import db, DATA_DIR
 from player import Player
+from tinydb import Query
+from time import sleep
+from platform import machine
 
 logger = logging.getLogger("oxo")
 
@@ -17,7 +22,6 @@ class Video(Player):
     def __init__(self):
         """Init as Player."""
         super(Video, self).__init__()
-        print super(Video, self)
         self.logger = logging.getLogger("oxo")
         self.close_player = False
         self.stopped = False
@@ -31,18 +35,31 @@ class Video(Player):
         """Thread target."""
         while not self.stopped:
             current_clip = Video.get_next()
-            self.logger.info("Starting video player with clip {}".format(current_clip["filename"]))
-            self.player = mplayer(self.filepath(current_clip),
-                "-slave",
-                "-fs",
-                "-vo", "sdl",
-                _bg=True,
-                _out=self.interact,
-                _done=self.teardown)
-            try:
-                self.player.wait()
-            except ErrorReturnCode_1:
-                self.logger.error("Video player returned code 1.")
+            if current_clip is None:
+                self.logger.debug("No clips in database. Waiting...")
+                sleep(5)
+            else:
+                self.logger.info("Starting video player with clip {}".format(current_clip["filename"]))
+                if machine() == "armv7l":
+                    # Raspberry
+                    player_args = [
+                        "-slave",
+                        "-fs",
+                        "-vo", "sdl"
+                    ]
+                else:
+                    # Dev
+                    player_args = ["-slave"]
+
+                self.player = mplayer(Video.filepath(current_clip),
+                    _bg=True,
+                    _out=Video.interact,
+                    *player_args)
+                try:
+                    self.player.wait()
+                    self.logger.debug("Player ended {}".format(self.player))
+                except ErrorReturnCode_1:
+                    self.logger.error("Video player returned code 1.")
         self.logger.debug("Exit video player")
 
     @classmethod
@@ -60,16 +77,18 @@ class Video(Player):
 
     @classmethod
     def get_next(cls):
-        """Select recently added video or a random one from appdata."""
-        global appdata
-
-        if "incoming" in appdata.keys() and appdata["incoming"]:
-            rv = appdata["incoming"]
-            appdata["incoming"] = None
-            save()
+        """Select recently added video or a random one from db."""
+        q = Query()
+        q_incoming = db.search(q.incoming == True)
+        if len(q_incoming) > 0:
+            rv = q_incoming[0]
+            db.update({"incoming": False}, q.incoming == True)
             logger.info("Enqueuing shortlisted clip {}".format(rv["filename"]))
-        elif len(appdata["clips"]) > 0:
-            rv = choice(appdata["clips"])
         else:
-            rv = None
+            q = Query()
+            q_clips = db.search(q.type == "clip")
+            if len(q_clips) > 0:
+                rv = choice(q_clips)
+            else:
+                rv = None
         return rv

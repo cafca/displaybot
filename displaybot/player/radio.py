@@ -10,13 +10,11 @@ from time import sleep
 from collections import OrderedDict
 from telegram.ext import Job
 from sh import mplayer
-
+from tinydb import Query
 from telegram import ParseMode, ChatAction
-from config import load, save
-from player import Player, log_exceptions, inline_keyboard
 
-global appdata
-appdata = load()
+from config import db
+from player import Player, log_exceptions, inline_keyboard
 
 
 class Radio(Player):
@@ -25,56 +23,68 @@ class Radio(Player):
     def __init__(self):
         """Init as Player."""
         super(Radio, self).__init__()
-        self.url = None
+
+    @classmethod
+    def state(cls):
+        """Return a db query and radio state."""
+        q = Query()
+        q_config = db.search(q.type == "radio")
+        return (q, q_config[0]) if len(q_config) > 0 else (q, {})
+
+    def stop(self):
+        """Reset sent title state before stopping thread."""
+        q = Query()
+        db.update({"station_playing_sent": None}, q.type == "radio")
+        super(Radio, self).stop()
 
     @log_exceptions
     def run(self):
         """Thread target."""
         self.stopped = False
         current_url = None
-        title = None
-        self.reset_title()
+        current_title = None
+
+        q, state = Radio.state()
+        db.update({"station_title": None}, q.type == "radio")
 
         while not self.stopped:
-            self.update()
-            if current_url != self.url:
+            # Restart mplayer whenever station changes
+            q, state = Radio.state()
+            title = state.get("station_title")
+
+            q_station = db.search(q.name == state.get("station_playing"))
+            url = q_station[0]["url"] if len(q_station) > 0 else None
+
+            if current_url != url:
                 self.logger.debug("Station changed")
                 if self.running:
-                    self.player.terminate()
-                    self.logger.info("Stopped running radio")
+                    try:
+                        self.player.terminate()
+                    except OSError as e:
+                        self.logger.debug(
+                            "Error stopping {} player '{}'\n{}".format(
+                                self.__class__.__name__, self.player, e), exc_info=True)
+                    else:
+                        self.logger.info("Stopped running radio")
                     self.player = None
-                else:
-                    self.logger.debug("No radio playing previously")
 
-                if self.url is not None:
-                    self.logger.info("Playing {}".format(self.url))
-                    self.player = mplayer(self.url, "-quiet",
+                if url is not None:
+                    self.logger.info("Playing {}".format(url))
+                    self.player = mplayer(url,
                         _bg=True,
                         _out=self.interact,
-                        _done=self.teardown,
                         _ok_code=[0, 1])
-                current_url = self.url
+                current_url = url
 
-            elif title != self.title:
-                title = self.title
-                self.logger.info("Title is {}".format(title))
+            elif current_title != title:
+                current_title = title
+                self.logger.info("Title is {}".format(current_title))
 
             sleep(1)
 
     #
     # Player state
     #
-
-    def update(self):
-        """Update player from global appdata."""
-        global appdata
-        self.url = appdata["stations"].get(appdata["station_playing"])
-        self.title = appdata.get("station_title")
-
-    def reset_title(self):
-        """Set title to None."""
-        global appdata
-        appdata["station_title"] = None
 
     @classmethod
     def interact(cls, line, stdin):
@@ -92,8 +102,8 @@ class Radio(Player):
                 title = line[start:end]
                 logger.debug("Found title in ICY: {}".format(title))
                 if len(title) > 0:
-                    global appdata
-                    appdata["station_title"] = title
+                    q = Query()
+                    db.update({"station_title": title}, q.type == "radio")
 
     #
     # Telegram interaction
@@ -103,9 +113,11 @@ class Radio(Player):
     def send_title(cls, bot, job):
         """Send current title to chat."""
         logger = logging.getLogger("oxo")
-        global appdata
-        t = appdata["station_title"]
-        t0 = appdata["station_title_sent"]
+
+        q, state = Radio.state()
+        t = state.get("station_title")
+        t0 = state.get("station_title_sent")
+
         if t != t0:
             if t:
                 msg = "▶️ Now playing {}".format(t)
@@ -115,17 +127,18 @@ class Radio(Player):
                 else:
                     logger.debug("Not compiling research for this title")
             logger.debug("Title changed from '{}' to '{}'".format(t0, t))
-            appdata["station_title_sent"] = t
-            save()
+
+            db.update({"station_title_sent": t}, q.type == "radio")
 
     @classmethod
     def send_fip_title(cls, bot, job):
         """Send info about currently playing song on fip through the fip web api."""
         logger = logging.getLogger("oxo")
-        global appdata
-
         logger.debug("Requesting fip current track")
-        last = appdata["station_title_sent"]
+
+        q, state = Radio.state()
+        last = state["station_title_sent"]
+        station_playing = state["station_playing"]
 
         fip_stations = {
             "fip": 7,
@@ -137,7 +150,7 @@ class Radio(Player):
             "fip tout nouveau": 70
         }
 
-        fip_station = fip_stations.get(appdata["station_playing"])
+        fip_station = fip_stations.get(station_playing)
         url = "http://www.fipradio.fr/livemeta/{}".format(fip_station)
         req = requests.get(url)
         data = req.json()
@@ -178,8 +191,7 @@ class Radio(Player):
                 disable_notification=True,
                 parse_mode=ParseMode.MARKDOWN)
 
-            appdata["station_title_sent"] = titlestr(current)
-            save()
+            db.update({"station_title_sent": titlestr(current)}, q.type == "radio")
 
             logger.debug("Title changed from '{}' to '{}'".format(
                 last, titlestr(current)))
@@ -234,7 +246,7 @@ class Radio(Player):
     @log_exceptions
     def telegram_command(cls, bot, update, job_queue, args=list()):
         """Handle telegram /radio command."""
-        global appdata
+        logger = logging.getLogger('oxo')
 
         # Remove the old title data job
         if len(job_queue.jobs()) > 0:
@@ -242,14 +254,17 @@ class Radio(Player):
             logger.debug("Removing {}".format(job))
             job.schedule_removal()
 
-        appdata["station_playing"] = None
-        appdata["station_playing_sent"] = None
-        save()
+        q, state = Radio.state()
+        db.update({
+            "station_playing": None,
+            "station_playing_sent": None
+        }, q.type == "radio")
 
         # Radio station selector
+        q_station_names = db.search(q.type == "station")
+        station_dict = {s["name"]: s["name"] for s in q_station_names}
         msg = "⏹ Radio turned off.\n\nSelect a station to start."
-        kb = inline_keyboard(OrderedDict(
-            sorted({k: k for k in appdata["stations"].keys()}.items())))
+        kb = inline_keyboard(OrderedDict(sorted(station_dict.items())))
         bot.sendMessage(chat_id=update.message.chat_id, text=msg,
             reply_markup=kb)
 
@@ -257,17 +272,18 @@ class Radio(Player):
     @log_exceptions
     def telegram_change_station(cls, bot, update, job_queue):
         """Answer callback from radio station selector."""
-        global appdata
         q = update.callback_query
         station = q.data
         logger = logging.getLogger('oxo')
-        if station in appdata["stations"]:
+
+        db_q = Query()
+        q_station = db.search(db_q.name == station)
+        if len(q_station) > 0:
             logger.info("Requesting station {} (inline)".format(station))
             bot.answerCallbackQuery(q.id,
                 text="Tuning to {}...".format(station))
 
-            appdata["station_playing"] = station
-            save()
+            db.update({"station_playing": station}, db_q.type == "radio")
 
             if station.startswith("fip"):
                 logger.info("Starting fip api title crawler...")
