@@ -58,14 +58,7 @@ class Radio(Player):
             if current_url != url:
                 self.logger.debug("Station changed")
                 if self.running:
-                    try:
-                        self.player.terminate()
-                    except OSError as e:
-                        self.logger.debug(
-                            "Error stopping {} player '{}'\n{}".format(
-                                self.__class__.__name__, self.player, e), exc_info=True)
-                    else:
-                        self.logger.info("Stopped running radio")
+                    self.stop()
                     self.player = None
 
                 if url is not None:

@@ -41,7 +41,7 @@ def main():
     # Start the player
     gif_player = Video()
     gif_player.setDaemon(True)
-    # gif_player.start()
+    gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
