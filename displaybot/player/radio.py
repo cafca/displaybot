@@ -196,6 +196,10 @@ class Radio(Player):
     def send_research(cls, subject, bot, job, image_url=None):
         """Send wikipedia summary and image or supplied image to chat."""
         logger = logging.getLogger("oxo")
+
+        if subject is None:
+            return
+
         logger.info("Researching '{}'".format(subject))
         bot.sendChatAction(chat_id=job.context, action=ChatAction.TYPING)
 
