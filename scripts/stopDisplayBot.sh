@@ -3,5 +3,6 @@
 
 # Stop display bot
 
-killall mplayer
 killall Python
+killall python
+killall mplayer
