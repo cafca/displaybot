@@ -58,8 +58,8 @@ class RouterController:
         self.driver.get(
             "{}/system/reboot.lua?sid={}".format(self.url, self.sid))
         reboot = self.driver.find_element_by_name('reboot')
+        self.logger.warning("Router is restarting now.")
         reboot.click()
-        self.logger.debug("Router is restarting now.")
 
 if __name__ == '__main__':
     router = RouterController("http://192.168.188.1", "~/.displayBot/ROUTER_LOGIN")

@@ -4,7 +4,9 @@
 import logging
 import requests
 
+from config import router_url, router_passfile
 from conversion import download_clip
+from router import RouterController
 
 logger = logging.getLogger('oxo')
 
@@ -23,6 +25,17 @@ def start(bot, update):
 def error(bot, update, error):
     """Handle errors, just in case."""
     logger.warn('Update "%s" caused error "%s"' % (update, error))
+
+
+def reboot(bot, update):
+    """Let router controller start reboot sequence."""
+    logger.debug("Received reboot command from telegram")
+    bot.sendMessage(update.message.chat_id, text='Preparing to reboot FritzBox...')
+    router = RouterController(router_url, router_passfile)
+
+    logger.debug("Starting reboot command")
+    bot.sendMessage(update.message.chat_id, text='Rebooting now. See ya 💋')
+    router.reboot()
 
 
 def receive(bot, update):

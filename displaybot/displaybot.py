@@ -5,7 +5,7 @@
 
 from config import TELEGRAM_API_TOKEN, setup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler
-from bot import start, receive, error
+from bot import start, receive, reboot, error
 from player.radio import Radio
 from player.video import Video
 
@@ -14,19 +14,19 @@ def main():
     """Main loop for the bot."""
     setup()
 
-    # Create the EventHandler and pass it your bot's token.
     updater = Updater(TELEGRAM_API_TOKEN)
-
-    # Get the dispatcher to register handlers
     dp = updater.dispatcher
-
-    # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("reboot", reboot))
 
     # radio
-    dp.add_handler(CommandHandler("radio", Radio.telegram_command,
-        pass_args=True, pass_job_queue=True))
-    dp.add_handler(CallbackQueryHandler(Radio.telegram_change_station,
+    dp.add_handler(CommandHandler("radio",
+        Radio.telegram_command,
+        pass_args=True,
+        pass_job_queue=True))
+
+    dp.add_handler(CallbackQueryHandler(
+        Radio.telegram_change_station,
         pass_job_queue=True))
 
     # on noncommand i.e message - echo the message on Telegram
@@ -38,10 +38,10 @@ def main():
     # Start the Bot
     updater.start_polling()
 
-    # Start the player
+    # Start the players
     gif_player = Video()
     gif_player.setDaemon(True)
-    gif_player.start()
+    # gif_player.start()
 
     radio = Radio()
     radio.setDaemon(True)
