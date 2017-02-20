@@ -21,3 +21,4 @@ npm-debug.log
 userdata/*
 *.log
 nohup.out
+*.sublime-project
