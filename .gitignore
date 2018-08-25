@@ -15,6 +15,7 @@ build
 # misc
 .DS_Store
 .env
+env
 npm-debug.log
 
 
@@ -23,3 +24,5 @@ userdata/*
 nohup.out
 *.sublime-project
 *.pyc
+
+*.code-workspace
