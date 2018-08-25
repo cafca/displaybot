@@ -104,7 +104,7 @@ def setup():
         }
 
         db.insert_multiple([{"type": "station", "name": name, "url": url}
-            for name, url in stations.items()])
+            for name, url in list(stations.items())])
 
         db.insert({"type": "incoming", "clip": {}})
     else:

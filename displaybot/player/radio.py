@@ -174,7 +174,7 @@ class Radio(Player):
                 return None
 
         if titlestr(current) != last:
-            msg = u"▶️ Now playing {artist} – _{title}_ \nfrom {album}".format(
+            msg = "▶️ Now playing {artist} – _{title}_ \nfrom {album}".format(
                 title=current["title"],
                 artist=current["artist"],
                 album=current["album"])
@@ -217,7 +217,7 @@ class Radio(Player):
                 return
 
             logger.debug("Wikipedia: {}".format(wp))
-            msg = u"*{}*\n{}\n\n[Wikipedia]({})".format(
+            msg = "*{}*\n{}\n\n[Wikipedia]({})".format(
                 wp.title, wp.summary, wp.url)
 
             bot.sendMessage(chat_id=job.context,
@@ -227,7 +227,7 @@ class Radio(Player):
                 parse_mode=ParseMode.MARKDOWN)
 
             if image_url is None:
-                wp_images = filter(lambda url: url.endswith("jpg"), wp.images)
+                wp_images = [url for url in wp.images if url.endswith("jpg")]
                 image_url = wp_images[0] if len(wp_images) > 0 else None
 
             if image_url:

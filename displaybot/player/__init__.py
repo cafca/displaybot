@@ -12,7 +12,7 @@ logger = logging.getLogger('oxo')
 def inline_keyboard(options):
     """Return an inline Keyboard given a dictionary of callback:display pairs."""
     rv = InlineKeyboardMarkup([[InlineKeyboardButton(v, callback_data=k)]
-        for k, v in options.items()])
+        for k, v in list(options.items())])
     return rv
 
 

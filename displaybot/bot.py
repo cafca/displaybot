@@ -29,7 +29,7 @@ def error(bot, update, error):
 def reboot(bot, update):
     """Let router controller start reboot sequence."""
     try:
-        from router import RouterController
+        from .router import RouterController
     except ModuleNotFoundError:
         logger.warning("Please install Selenium to access router")
     else:
