@@ -206,7 +206,7 @@ class Radio(Player):
         wp_articles = wikipedia.search(subject)
         logger.debug("WP Articles: {}".format(wp_articles))
         if len(wp_articles) > 0:
-            for i in xrange(len(wp_articles)):
+            for i in range(len(wp_articles)):
                 try:
                     wp = wikipedia.page(wp_articles[0])
                     break

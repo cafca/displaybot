@@ -30,7 +30,7 @@ def download_clip(url, bot, update, content_type, fname=None):
         fpath = os.path.join(DATA_DIR, "clips", fname)
         logger.debug("Downloading clip to {}...".format(fpath))
 
-        with open(fpath, "w+") as f:
+        with open(fpath, "wb+") as f:
             r = requests.get(url, stream=True)
 
             if r.ok:

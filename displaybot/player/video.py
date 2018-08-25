@@ -12,6 +12,7 @@ from player import Player
 from tinydb import Query
 from time import sleep
 from platform import machine
+from json.decoder import JSONDecodeError
 
 logger = logging.getLogger("oxo")
 
@@ -86,9 +87,10 @@ class Video(Player):
             logger.info("Enqueuing shortlisted clip {}".format(rv["filename"]))
         else:
             q = Query()
-            q_clips = db.search(q.type == "clip")
-            if len(q_clips) > 0:
-                rv = choice(q_clips)
-            else:
+            try:
+                q_clips = db.search(q.type == "clip")
+            except JSONDecodeError:
                 rv = None
+            else:
+                rv = choice(q_clips) if len(q_clips) > 0 else None
         return rv
