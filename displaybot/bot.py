@@ -57,8 +57,7 @@ def receive(bot, update):
             logger.debug("Processing attachment")
             file_data = bot.getFile(doc.file_id)
             logger.debug("Downloading {}".format(file_data["file_path"]))
-            download_clip(file_data["file_path"], bot, update, doc["mime_type"],
-                fname=doc["file_name"])
+            download_clip(file_data["file_path"], bot, update, doc["mime_type"])
     except Exception as e:
         logger.error(e, exc_info=True)
 

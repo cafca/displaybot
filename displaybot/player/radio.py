@@ -9,7 +9,7 @@ import requests
 from time import sleep
 from collections import OrderedDict
 from telegram.ext import Job
-from sh import mplayer
+# from sh import mplayer
 from tinydb import Query
 from telegram import ParseMode, ChatAction
 

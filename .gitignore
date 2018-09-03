@@ -18,8 +18,11 @@ build
 env
 npm-debug.log
 
+clips/
+database.json
+hello.log
+TELEGRAM_API_TOKEN
 
-userdata/*
 *.log
 nohup.out
 *.sublime-project

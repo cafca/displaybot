@@ -5,11 +5,16 @@ as well as a webradio. Both can be accessed and controlled through a Telegram bo
 
 # Installation
 
-First, install `mplayer` and `ffmpeg` through a package manager.
+First, install `mplayer` and `ffmpeg` through a package manager. Then clone 
+displaybot to `~/displaybot` and make a virtual environment for it.
 
 Then
 
     $ pip install -r requirements.txt
+
+Finally
+
+    $ ./scripts/setup.sh
 
 # Router controller
 
@@ -22,7 +27,7 @@ additional dependencies.
     $ npm install -g phantomjs-prebuilt
 
   Or on a Raspberry 2 or 3 with [these instructions](https://github.com/fg2it/phantomjs-on-raspberry/tree/master/rpi-2-3/wheezy-jessie/v2.1.1).
-* Place your router password in `~/.displayBot/ROUTER_LOGIN`.
+* Place your router password in `~/displaybot/ROUTER_LOGIN`.
 
 # License
 

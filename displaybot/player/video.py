@@ -8,6 +8,7 @@ import os
 from sh import mplayer, ErrorReturnCode_1
 from random import choice
 from config import db, DATA_DIR
+from omxplayer.player import OMXPlayer
 from player import Player
 from tinydb import Query
 from time import sleep
@@ -40,27 +41,34 @@ class Video(Player):
                 self.logger.debug("No clips in database. Waiting...")
                 sleep(5)
             else:
-                self.logger.info("Starting video player with clip {}".format(current_clip["filename"]))
+                self.logger.debug("Starting video player with clip [{}]".format(
+                    current_clip["filename"][:6]))
+
+                full_path = self.filepath(current_clip)
+
                 if machine() == "armv7l":
-                    # Raspberry
                     player_args = [
-                        "-slave",
-                        "-fs",
-                        "-vo", "sdl"
+                        '--blank',
+                        '-o', 'hdmi',
+                        '--loop',
+                        '--no-osd',
+                        '--aspect-mode', 'fill',
+                        '--win', "'0, 0, 810, 540'"
                     ]
                 else:
-                    # Dev
-                    player_args = ["-slave"]
+                    player_args = [
+                        '-b',
+                        '--loop'
+                    ]
 
-                self.player = mplayer(Video.filepath(current_clip),
-                    _bg=True,
-                    _out=Video.interact,
-                    *player_args)
-                try:
-                    self.player.wait()
-                    self.logger.debug("Player ended {}".format(self.player))
-                except ErrorReturnCode_1:
-                    self.logger.error("Video player returned code 1.")
+                if self.player is None:
+                    self.player = OMXPlayer(full_path, player_args)
+                else:
+                    self.player.load(full_path, player_args)
+                    self.player.play()
+
+                sleep(5)
+                self.player.pause()
         self.logger.debug("Exit video player")
 
     @classmethod

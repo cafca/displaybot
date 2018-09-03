@@ -10,7 +10,7 @@ from tinydb import TinyDB, Query
 
 # Setup db
 
-DATA_DIR = os.path.expanduser(os.path.join("~", ".displayBot"))
+DATA_DIR = os.path.expanduser(os.path.join("~", "displaybot"))
 
 config_fname = os.path.join(DATA_DIR, "database.json")
 db = TinyDB(config_fname)

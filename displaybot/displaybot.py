@@ -46,7 +46,7 @@ def main():
 
     radio = Radio()
     radio.setDaemon(True)
-    radio.start()
+    # radio.start()
 
     # Run the bot until the you presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since

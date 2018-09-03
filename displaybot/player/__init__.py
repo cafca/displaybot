@@ -51,7 +51,7 @@ class Player(Thread):
         self.stopped = True
         if self.running:
             try:
-                self.player.terminate()
+                self.player.quit()
             except OSError as e:
                 self.logger.debug(
                     "Error stopping {} player '{}'\n{}".format(

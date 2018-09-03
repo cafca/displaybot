@@ -3,6 +3,7 @@
 """Download and file clips."""
 
 import logging
+import hashlib
 import os
 import datetime
 import ffmpy
@@ -17,14 +18,15 @@ logger = logging.getLogger('oxo')
 def download_clip(url, bot, update, content_type, fname=None):
     """Download clips."""
     if not fname:
-        fname = url.split("/")[-1]
+        fname = hashlib.sha1(url.encode(encoding='UTF-8')).hexdigest()
 
     author = update.message.from_user.first_name
     if content_type not in SUPPORTED_TYPES:
         logger.info("Link not supported: \n{}\nType{}".format(
             url, content_type))
-    if duplicate(fname):
-        logger.info("Detected duplicate {}".format(fname))
+        bot.sendMessage(chat_id=update.message.chat_id, text="👾 Link not supported. Only mp4, webm and gif links.")
+    elif duplicate(url):
+        logger.info("Detected duplicate {}".format(url))
         update.message.reply_text("👾 Reposter!")
     else:
         fpath = os.path.join(DATA_DIR, "clips", fname)
@@ -58,10 +60,10 @@ def download_clip(url, bot, update, content_type, fname=None):
         logger.info("Saved new clip {} from {}".format(fname, author))
 
 
-def duplicate(filename):
+def duplicate(url):
     """Boolean, true if given filenam exists in clips."""
     Duplicate = Query()
-    return len(db.search(Duplicate.filename == filename)) > 0
+    return len(db.search(Duplicate.url == url)) > 0
 
 #
 # Converting gifs
