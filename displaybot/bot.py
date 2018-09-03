@@ -1,6 +1,7 @@
 # coding: utf-8
 
 """Configuration."""
+import os
 import logging
 import requests
 
@@ -26,20 +27,10 @@ def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
 
 
-def reboot(bot, update):
-    """Let router controller start reboot sequence."""
-    try:
-        from .router import RouterController
-    except ModuleNotFoundError:
-        logger.warning("Please install Selenium to access router")
-    else:
-        logger.debug("Received reboot command from telegram")
-        bot.sendMessage(update.message.chat_id, text='Preparing to reboot FritzBox...')
-        router = RouterController(router_url, router_passfile)
-
-        logger.debug("Starting reboot command")
-        bot.sendMessage(update.message.chat_id, text='Rebooting now. See ya 💋')
-        router.reboot()
+def shutdown(bot, update):
+    """Shutdown the display bot."""
+    bot.sendMessage(update.message.chat_id, text='Shutting down now. See ya 💋')
+    os.system("sudo shutdown -h now")
 
 
 def receive(bot, update):

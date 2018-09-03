@@ -6,7 +6,7 @@
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler
 
 from config import TELEGRAM_API_TOKEN, setup
-from bot import start, receive, reboot, error
+from bot import start, receive, shutdown, error
 from player.radio import Radio
 from player.video import Video
 
@@ -18,7 +18,7 @@ def main():
     updater = Updater(TELEGRAM_API_TOKEN)
     dp = updater.dispatcher
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("reboot", reboot))
+    dp.add_handler(CommandHandler("shutdown", shutdown))
 
     # radio
     dp.add_handler(CommandHandler("radio",
