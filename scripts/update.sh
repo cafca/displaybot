@@ -13,7 +13,7 @@ if [ $LOCAL = $REMOTE ]; then
 elif [ $LOCAL = $BASE ]; then
     echo "Need to pull"
     git pull;
-    sudo systemctl restart displaybot;
+    systemctl restart displaybot;
 elif [ $REMOTE = $BASE ]; then
     echo "Need to push"
 else

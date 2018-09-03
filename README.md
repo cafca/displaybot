@@ -29,7 +29,7 @@ Now you can run displaybot from its root dir with
 # Updates
 
 If you want to update the bot unattended you can create a cron entry that
-executes `scripts/update.sh`. To do this run `crontab -e`, move to the bottom
+executes `scripts/update.sh`. To do this run `sudo crontab -e`, move to the bottom
 and add a new line
 
     0 * * * * /home/pi/displaybot/scripts/update.sh
