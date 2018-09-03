@@ -102,3 +102,13 @@ class Video(Player):
             else:
                 rv = choice(q_clips) if len(q_clips) > 0 else None
         return rv
+
+    def stop(self):
+        """Quit omxplayer instance."""
+        self.logger.debug("Stopping {} player...".format(self.__class__.__name__))
+        self.stopped = True
+        if self.running:
+            self.player.quit()
+            self.logger.info("{} stopped".format(self.__class__.__name__))
+        else:
+            self.logger.debug("{} did not play".format(self.__class__.__name__))

@@ -9,7 +9,7 @@ import requests
 from time import sleep
 from collections import OrderedDict
 from telegram.ext import Job
-# from sh import mplayer
+from sh import mplayer
 from tinydb import Query
 from telegram import ParseMode, ChatAction
 
@@ -57,9 +57,12 @@ class Radio(Player):
 
             if current_url != url:
                 self.logger.debug("Station changed")
-                if self.running:
+                try:
                     self.stop()
                     self.player = None
+                    self.stopped = False  # keep this loop running
+                except Exception as e:
+                    self.logger.debug("Player is already stopped {}".format(e))
 
                 if url is not None:
                     self.logger.info("Playing {}".format(url))
@@ -67,6 +70,7 @@ class Radio(Player):
                         _bg=True,
                         _out=self.interact,
                         _ok_code=[0, 1])
+                    
                 current_url = url
 
             elif current_title != title:

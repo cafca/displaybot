@@ -43,7 +43,7 @@ class Player(Thread):
     @property
     def running(self):
         """Boolean property, true when external player loaded."""
-        return self.player is not None and self.player != ''
+        return self.player is not None
 
     def stop(self):
         """Quit mplayer instance."""
@@ -51,7 +51,7 @@ class Player(Thread):
         self.stopped = True
         if self.running:
             try:
-                self.player.quit()
+                self.player.terminate()
             except OSError as e:
                 self.logger.debug(
                     "Error stopping {} player '{}'\n{}".format(
