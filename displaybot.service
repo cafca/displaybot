@@ -1,0 +1,13 @@
+[Unit]
+Description=DisplayBot
+After=multi-user.target
+
+[Service]
+WorkingDirectory=/home/pi/displaybot/
+User=pi
+Restart=always
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/displaybot/displaybot/displaybot.py
+
+[Install]
+WantedBy=multi-user.target

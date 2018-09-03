@@ -26,9 +26,6 @@ SUPPORTED_TYPES = ["video/mp4", "video/webm", "image/gif"]
 SERVER_URL = "http://localhost:3000"
 playnext = None
 
-router_url = "http://192.168.188.1"
-router_passfile = os.path.join(DATA_DIR, "ROUTER_LOGIN")
-
 logger = logging.getLogger("oxo")
 logger.setLevel(logging.DEBUG)
 

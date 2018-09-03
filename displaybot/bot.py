@@ -5,7 +5,6 @@ import os
 import logging
 import requests
 
-from config import router_url, router_passfile
 from conversion import download_clip
 
 logger = logging.getLogger('oxo')

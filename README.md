@@ -5,8 +5,8 @@ as well as a webradio. Both can be accessed and controlled through a Telegram bo
 
 # Installation
 
-First, install `mplayer` and `ffmpeg` through a package manager. Then clone 
-displaybot to `~/displaybot` and make a virtual environment for it.
+First, install `mplayer`, `omxplayer` and `ffmpeg` through a package manager. Then clone 
+displaybot to `~/displaybot` and make a Python 3 virtual environment for it.
 
 Then
 
@@ -16,18 +16,9 @@ Finally
 
     $ ./scripts/setup.sh
 
-# Router controller
-
-The bot can control a FritzBox through its web interface, which requires
-additional dependencies.
-
-* Install `node` and `npm`
-* Install `PhantomJS`, either with
-
-    $ npm install -g phantomjs-prebuilt
-
-  Or on a Raspberry 2 or 3 with [these instructions](https://github.com/fg2it/phantomjs-on-raspberry/tree/master/rpi-2-3/wheezy-jessie/v2.1.1).
-* Place your router password in `~/displaybot/ROUTER_LOGIN`.
+This script creates folders for the clips, asks you for a Telegram bot API token
+(which you can get by adding @BotFather in Telegram) and optionally installs
+a systemd unit file to start the script automatically on system start.
 
 # License
 
